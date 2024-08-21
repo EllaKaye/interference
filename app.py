@@ -1,5 +1,6 @@
 from shiny import App, reactive, render, ui
 import random
+from typing import Optional
 
 # Card constants
 CARD_VALUES = ["Blank", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
@@ -50,12 +51,15 @@ app_ui = ui.page_fluid(
     ui.output_ui("cards"),
     ui.output_text("clicked_card_text"),
     ui.output_text("debug_output"),
+    ui.output_text("card_1_and_blank"),
 )
 
 def server(input, output, session):
     deck = reactive.Value(Deck())
-    clicked_card = reactive.Value(None)
+    clicked_card: reactive.Value[Optional[Card]] = reactive.Value(None)
     debug_message = reactive.Value("")
+    card_1: reactive.Value[Optional[Card]] = reactive.Value(None)
+    blank: reactive.Value[Optional[Card]] = reactive.Value(None)
 
     @reactive.Effect
     @reactive.event(input.shuffle)
@@ -63,6 +67,8 @@ def server(input, output, session):
         new_deck = Deck()
         new_deck.shuffle()
         deck.set(new_deck)
+        card_1.set(None)
+        blank.set(None)
 
     @render.ui
     def cards():
@@ -97,9 +103,18 @@ def server(input, output, session):
     def _():
         if input.clicked_card():
             suit, value = input.clicked_card().split(":")
-            clicked_card.set(Card(suit, value))
-            debug_message.set(f"Card clicked: {suit} {value} (value_int: {clicked_card().value_int})")
-            print(f"Card clicked: {suit} {value} (value_int: {clicked_card().value_int})")  # Debug print
+            new_card = Card(suit, value)
+            clicked_card.set(new_card)
+            debug_message.set(f"Card clicked: {suit} {value} (value_int: {new_card.value_int})")
+            print(f"Card clicked: {suit} {value} (value_int: {new_card.value_int})")  # Debug print
+
+            if card_1() is None and blank() is None and value != "Blank":
+                card_1.set(new_card)
+            elif card_1() is not None and blank() is None:
+                if value != "Blank":
+                    card_1.set(new_card)
+                else:
+                    blank.set(new_card)
 
     @render.text
     def clicked_card_text():
@@ -111,5 +126,11 @@ def server(input, output, session):
     @render.text
     def debug_output():
         return debug_message()
+
+    @render.text
+    def card_1_and_blank():
+        card_1_str = str(card_1()) if card_1() else "None"
+        blank_str = str(blank()) if blank() else "None"
+        return f"card_1: {card_1_str}, blank: {blank_str}"
 
 app = App(app_ui, server)
