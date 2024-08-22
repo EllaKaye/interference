@@ -177,20 +177,17 @@ class Game:
                 self.rows.swap_cards(self.card_1, self.blank)
                 self.card_1 = self.blank = None
 
-                # check if game is won
-                self.won = self.rows.all_ordered()
-                if self.won:
-                    print("You won!")
-
                 # check if round is stuck
                 self.round_over = self.rows.all_stuck()
                 if self.round_over:
-                    print("Round over")
-
-                    # check if game is lost
-                    if self.round == 3:
-                        self.won = False
+                    # check if game is won or lost
+                    self.won = self.rows.all_ordered()
+                    if self.won:
+                        print("You won!")
+                    elif self.round == 3 and not self.won:
                         print("Game over. You lost.")
+                    else:
+                        print("Round over. Click 'New Round' to continue")
 
 
                 return "Valid move, cards swapped"
