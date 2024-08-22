@@ -327,7 +327,7 @@ def server(input, output, session):
             ui.tags.style("""
                 .card-container { display: flex; flex-direction: column; }
                 .card-row { display: flex; justify-content: flex-start; margin-bottom: 20px; }
-                .card, .card-placeholder { margin: 2px; cursor: pointer; width: 100px; height: 140px; }
+                .card, .card-placeholder { margin: 2px; cursor: pointer; width: 90px; height: 126px; }
                 .card-placeholder { background-color: #f0f0f0; border: 1px dashed #ccc; border-radius: 5px; }
             """),
             ui.div(
@@ -337,7 +337,7 @@ def server(input, output, session):
                         {"class": "card-row"},
                         [
                             ui.div(
-                                ui.img(src=card.image_url(), style="width: 100px; height: 140px;") if card.value != "Blank" else "",
+                                ui.img(src=card.image_url(), style="width: 90px; height: 126px;") if card.value != "Blank" else "",
                                 class_="card" if card.value != "Blank" else "card-placeholder",
                                 onclick=f"Shiny.setInputValue('clicked_card', '{card.suit}:{card.value}')"
                             )
