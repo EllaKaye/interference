@@ -251,15 +251,15 @@ app_ui = ui.page_navbar(
                     offset=1
                 )
             ),
-            ui.tags.head(
+            #ui.tags.head(
             #    ui.tags.link(rel="stylesheet", href="styles.css")  # Link to the custom CSS file
                 # or inline css
-                    ui.tags.style("""
-                        body {
-                            background-color: #197C54; /* green background */
-                        }
-                    """)
-            ),
+                    #ui.tags.style("""
+                    #    body {
+                    #        background-color: #197C54; /* green background */
+                    #    }
+                    #""")
+            #),
         )
     ),
     ui.nav_panel("Instructions", 
