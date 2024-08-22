@@ -251,15 +251,26 @@ app_ui = ui.page_navbar(
                     offset=1
                 )
             ),
-            #ui.tags.head(
+            ui.tags.head(
             #    ui.tags.link(rel="stylesheet", href="styles.css")  # Link to the custom CSS file
                 # or inline css
-                    #ui.tags.style("""
-                    #    body {
-                    #        background-color: #197C54; /* green background */
-                    #    }
-                    #""")
-            #),
+                    ui.tags.style("""
+                        body {
+                            background-color: #156645; /* green background */
+                            color: white;
+                        }
+                        .card img {
+                            box-shadow: none;
+                            border: none;
+                            display: block;
+                            background-color: #156645;
+                        }
+                        .card, .card-placeholder {
+                            box-shadow: none;
+                        border: none;
+                        }
+                    """)
+            ),
         )
     ),
     ui.nav_panel("Instructions", 
@@ -338,7 +349,7 @@ def server(input, output, session):
                 .card-container { display: flex; flex-direction: column; }
                 .card-row { display: flex; justify-content: flex-start; margin-bottom: 20px; }
                 .card, .card-placeholder { margin: 2px; cursor: pointer; width: 90px; height: 126px; }
-                .card-placeholder { background-color: #f0f0f0; border: 1px dashed #ccc; border-radius: 5px; }
+                .card-placeholder { background-color: #197C54; border-radius: 5px; }
             """),
             ui.div(
                 {"class": "card-container"},
