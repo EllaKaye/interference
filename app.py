@@ -279,7 +279,14 @@ app_ui = ui.page_navbar(
                             color: #197C54;
                             border-color: white;
                         }
-                    """)
+                        .navbar-nav .nav-link {
+                            color: #115439 !important;
+                            font-size: 18px;
+                            #font-weight: bold;
+                            text-transform: uppercase;
+                            transition: color 0.3s;
+                        }
+                """)
             ),
         )
     ),
