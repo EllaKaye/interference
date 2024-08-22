@@ -42,6 +42,19 @@ class Row(list):
         # We have looped over row and found all Blanks after Kings
         return True
 
+    def is_ordered(self):
+        if len(self) != 13:
+            return False
+        
+        # Check if the first 12 cards are in order and of the same suit
+        suit = self[0].suit
+        for i in range(12):
+            if self[i].suit != suit or self[i].value_int != i + 2:
+                return False
+        
+        # Check if the last card is a Blank
+        return self[12].value == "Blank"
+
     def split_index(self):
         if self[0].value_int != 2:
             return 0
@@ -112,6 +125,9 @@ class Rows(list):
         unordered = [element for item in split_rows for element in item[1]]
         return ordered, unordered
 
+    def all_ordered(self):
+        return all(row.is_ordered() for row in self)
+
 class Deck:
     def __init__(self):
         self.cards = [Card(suit, value) for suit in CARD_SUITS for value in CARD_VALUES if value != "A"]
@@ -143,6 +159,7 @@ class Game:
         self.round = 1
         self.round_over = self.rows.all_stuck()
         self.round_message = f"Round {self.round} of 3"
+        self.won = None
 
     def handle_click(self, clicked_card: Card) -> str:
         if clicked_card.value != "Blank" and not self.card_1 and not self.blank:
@@ -160,10 +177,15 @@ class Game:
                 self.rows.swap_cards(self.card_1, self.blank)
                 self.card_1 = self.blank = None
 
-                # check if game is stuck
+                # check if round is stuck
                 self.round_over = self.rows.all_stuck()
                 if self.round_over:
                     print("Round over")
+
+                # check if game is won
+                self.won = self.rows.all_ordered()
+                if self.won:
+                    print("You won!")
 
                 return "Valid move, cards swapped"
             else:
@@ -173,7 +195,7 @@ class Game:
         return "No action"
 
     def new_round(self):
-        if self.round == 3:
+        if self.round == 100:
             return "Out of rounds"
 
         self.round_over = False
