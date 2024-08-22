@@ -241,9 +241,13 @@ app_ui = ui.page_navbar(
                         style="margin-bottom: 10px;"
                     ),
                     ui.div(
+                        ui.output_text("game_info_output"),
+                        style="margin-bottom: 10px; font-size: 120%"
+                    ), 
+                    ui.div(
                         ui.output_text("round_info"),
-                        style="margin-bottom: 10px"
-                    ),                 
+                        style="margin-bottom: 10px;"
+                    ),                    
                     ui.output_ui("cards"),
                     ui.output_text("clicked_card_text"),
                     ui.output_text("debug_output"),
@@ -331,7 +335,9 @@ def server(input, output, session):
     game = reactive.Value(Game())
     clicked_card: reactive.Value[Optional[Card]] = reactive.Value(None)
     debug_message = reactive.Value("")
+    game_info_message = reactive.Value("")
     game_state = reactive.Value(0)
+    game_info_message.set("New game started")
 
     @reactive.Effect
     @reactive.event(input.new_game)
@@ -340,6 +346,7 @@ def server(input, output, session):
         game_instance.new_game()
         game.set(game_instance)
         clicked_card.set(None)
+        game_info_message.set("New game started")
         debug_message.set("New game started")
         game_state.set(game_state() + 1)
 
@@ -349,6 +356,7 @@ def server(input, output, session):
         game_instance = game()
         result = game_instance.new_round()
         game.set(game_instance)
+        game_info_message.set("New round started")
         debug_message.set(result)
         game_state.set(game_state() + 1)
 
@@ -411,6 +419,10 @@ def server(input, output, session):
     @render.text
     def debug_output():
         return debug_message()
+
+    @render.text
+    def game_info_output():
+        return game_info_message()
 
     @render.text
     @reactive.event(game_state)
