@@ -81,19 +81,20 @@ def server(input, output, session):
     game = reactive.Value(Game())
     clicked_card: reactive.Value[Optional[Card]] = reactive.Value(None)
     debug_message = reactive.Value("")
-    game_state = reactive.Value(0)  # Add this line to track game state changes
+    game_state = reactive.Value(0)
 
     @reactive.Effect
     @reactive.event(input.new_game)
     def _():
-        game_instance = Game()  # Create a new Game instance
+        game_instance = game()
+        game_instance.new_game()
         game.set(game_instance)
         clicked_card.set(None)
         debug_message.set("New game started")
-        game_state.set(game_state() + 1)  # Increment game state to trigger UI update
+        game_state.set(game_state() + 1)
 
     @render.ui
-    @reactive.event(game_state)  # Add this decorator to make the UI react to game state changes
+    @reactive.event(game_state)
     def cards():
         rows = game().rows
         return ui.div(
@@ -134,6 +135,7 @@ def server(input, output, session):
             game_instance = game()
             game_instance.handle_click(new_card)
             game.set(game_instance)
+            game_state.set(game_state() + 1)  # Trigger UI update
 
     @render.text
     def clicked_card_text():
@@ -147,6 +149,7 @@ def server(input, output, session):
         return debug_message()
 
     @render.text
+    @reactive.event(game_state)  # Add this decorator to make it react to game state changes
     def card_1_and_blank():
         game_instance = game()
         card_1_str = str(game_instance.card_1) if game_instance.card_1 else "None"
