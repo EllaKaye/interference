@@ -1,6 +1,6 @@
 from shiny import App, reactive, render, ui
 import random
-from typing import Optional
+from typing import Optional, Tuple
 
 # Card constants
 CARD_VALUES = ["Blank", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
@@ -27,7 +27,49 @@ class Row(list):
     pass
 
 class Rows(list):
-    pass
+    def get_card_indices(self, card: Card) -> Tuple[int, int]:
+        print(f"calling get_card_indices for card: {card}")
+        for i, row in enumerate(self):
+            print(f"Checking row {i}:")
+            for j, c in enumerate(row):
+                print(f"  Comparing with card at index {j}: {c}")
+                if c.suit == card.suit and c.value == card.value:
+                    print(f"Debug: card found in row {i} at index {j}")
+                    return i, j
+        print("Debug: card not found in any row")
+        return -1, -1  # Return invalid indices if card not found
+
+    def get_test_card(self, card: Card) -> Optional[Card]:
+        card_row, card_index = self.get_card_indices(card)
+        if card_row == -1 or card_index == -1:
+            return None
+        if card_index == 0:
+            return None  # If the card is at the start of a row, test_card should be None
+        else:
+            return self[card_row][card_index - 1]
+
+    def is_valid_move(self, card1: Card, card2: Card) -> bool:
+        test_card = self.get_test_card(card2)
+        print(f"Debug - is_valid_move: card1={card1}, card2={card2}, test_card={test_card}")  # Debug print
+        print(f"Debug - self.rows:")
+        for i, row in enumerate(self):
+            print(f"Row {i}: {' '.join(str(card) for card in row)}")
+
+        if not test_card and card1.value_int == 2:
+            return True
+        elif not test_card:
+            return False
+        elif card1.suit == test_card.suit and card1.value_int == (test_card.value_int + 1):
+            return True
+        else:
+            return False
+
+    def swap_cards(self, card1: Card, card2: Card):
+        row1, index1 = self.get_card_indices(card1)
+        row2, index2 = self.get_card_indices(card2)
+        self[row1][index1], self[row2][index2] = self[row2][index2], self[row1][index1]
+
+# The rest of the code remains the same...
 
 class Deck:
     def __init__(self):
@@ -56,14 +98,27 @@ class Game:
         self.card_1: Optional[Card] = None
         self.blank: Optional[Card] = None
 
-    def handle_click(self, clicked_card: Card):
-        if self.card_1 is None and self.blank is None and clicked_card.value != "Blank":
+    def handle_click(self, clicked_card: Card) -> str:
+        if clicked_card.value != "Blank" and not self.card_1 and not self.blank:
             self.card_1 = clicked_card
-        elif self.card_1 is not None and self.blank is None:
-            if clicked_card.value != "Blank":
-                self.card_1 = clicked_card
+            return "Selected first card"
+        
+        elif clicked_card.value != "Blank" and self.card_1 and not self.blank:
+            self.card_1 = clicked_card
+            return "Changed selection"
+
+        elif clicked_card.value == "Blank" and self.card_1 and not self.blank:
+            self.blank = clicked_card
+
+            if self.rows.is_valid_move(self.card_1, self.blank):
+                self.rows.swap_cards(self.card_1, self.blank)
+                self.card_1 = self.blank = None
+                return "Valid move, cards swapped"
             else:
-                self.blank = clicked_card
+                self.card_1 = self.blank = None
+                return "Invalid move"
+
+        return "No action"
 
 app_ui = ui.page_fluid(
     ui.h1("Solitaire Game"),
@@ -129,12 +184,12 @@ def server(input, output, session):
             suit, value = input.clicked_card().split(":")
             new_card = Card(suit, value)
             clicked_card.set(new_card)
-            debug_message.set(f"Card clicked: {suit} {value} (value_int: {new_card.value_int})")
-            print(f"Card clicked: {suit} {value} (value_int: {new_card.value_int})")  # Debug print
-
+            
             game_instance = game()
-            game_instance.handle_click(new_card)
+            result = game_instance.handle_click(new_card)
             game.set(game_instance)
+            
+            debug_message.set(f"Card clicked: {suit} {value} (value_int: {new_card.value_int}). Result: {result}")
             game_state.set(game_state() + 1)  # Trigger UI update
 
     @render.text
@@ -149,7 +204,7 @@ def server(input, output, session):
         return debug_message()
 
     @render.text
-    @reactive.event(game_state)  # Add this decorator to make it react to game state changes
+    @reactive.event(game_state)
     def card_1_and_blank():
         game_instance = game()
         card_1_str = str(game_instance.card_1) if game_instance.card_1 else "None"
