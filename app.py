@@ -177,15 +177,21 @@ class Game:
                 self.rows.swap_cards(self.card_1, self.blank)
                 self.card_1 = self.blank = None
 
+                # check if game is won
+                self.won = self.rows.all_ordered()
+                if self.won:
+                    print("You won!")
+
                 # check if round is stuck
                 self.round_over = self.rows.all_stuck()
                 if self.round_over:
                     print("Round over")
 
-                # check if game is won
-                self.won = self.rows.all_ordered()
-                if self.won:
-                    print("You won!")
+                    # check if game is lost
+                    if self.round == 3:
+                        self.won = False
+                        print("Game over. You lost.")
+
 
                 return "Valid move, cards swapped"
             else:
@@ -195,7 +201,7 @@ class Game:
         return "No action"
 
     def new_round(self):
-        if self.round == 100:
+        if self.round == 3:
             return "Out of rounds"
 
         self.round_over = False
@@ -205,7 +211,7 @@ class Game:
         ordered, unordered = self.rows.ordered_unordered()
         self.rows = Rows([Row(row) for row in ordered])
 
-        # separate out blanks for the rest
+        # separate out blanks from the rest
         blanks = [card for card in unordered if card.value == "Blank"]
         value_cards = [card for card in unordered if card.value != "Blank"]
 
