@@ -230,51 +230,62 @@ class Game:
         return f"Starting Round {self.round}"
 
 app_ui = ui.page_navbar(
-    ui.nav_panel("Home",
-        ui.h1("Solitaire Game"),
+    ui.nav_panel("Game",
         ui.div(
-            ui.input_action_button("new_game", "New Game"),
-            ui.input_action_button("new_round", "New Round"),
-            style="margin-bottom: 10px;"
-        ),
-        ui.output_text("round_info"),
-        ui.output_ui("cards"),
-        ui.output_text("clicked_card_text"),
-        ui.output_text("debug_output"),
-        ui.output_text("card_1_and_blank"),
+            ui.row(
+                ui.column(10,
+                    ui.h1("Solitaire Game"),
+                    ui.div(
+                        ui.input_action_button("new_game", "New Game"),
+                        ui.input_action_button("new_round", "New Round"),
+                        style="margin-bottom: 10px;"
+                    ),
+                    ui.output_text("round_info"),
+                    ui.output_ui("cards"),
+                    ui.output_text("clicked_card_text"),
+                    ui.output_text("debug_output"),
+                    ui.output_text("card_1_and_blank"),
+                    offset=1
+                )
+            )
+        )
     ),
     ui.nav_panel("Instructions", 
-        ui.markdown("""
-            ## How to Play
+        ui.row(
+            ui.column(10,
+                ui.markdown("""
+                    ## How to Play
 
-            1. The game consists of four rows of 13 cards each.
-            2. Your goal is to arrange each row in ascending order from 2 to King, followed by a blank card.
-            3. Click on a card to select it, then click on a blank card to move the selected card there.
-            4. You can only move a card to a blank space if it's the next card in sequence and of the same suit.
-            5. The game ends when all rows are correctly ordered or when you run out of moves.
-            6. You have three rounds to complete the game.
+                    1. The game consists of four rows of 13 cards each.
+                    2. Your goal is to arrange each row in ascending order from 2 to King, followed by a blank card.
+                    3. Click on a card to select it, then click on a blank card to move the selected card there.
+                    4. You can only move a card to a blank space if it's the next card in sequence and of the same suit.
+                    5. The game ends when all rows are correctly ordered or when you run out of moves.
+                    6. You have three rounds to complete the game.
 
-            Good luck!
-        """)
+                    Good luck!
+                """),
+                offset=1
+            )
+        )
     ),
     ui.nav_panel("About",
-        ui.markdown("""
-            ## About This Game
+        ui.row(
+            ui.column(10,
+                ui.markdown("""
+                    ## About This Game
 
-            This Solitaire game was created as a Shiny for Python application. It demonstrates:
-
-            - Interactive web application development with Shiny
-            - Game logic implementation in Python
-            - Reactive programming concepts
-            - UI design and multi-page layouts
-
-            Developed by: [Your Name]
-            GitHub: [Your GitHub Profile]
-            Version: 1.0
-        """)
-    ),
-    title="Solitaire Game",
+                    Developed by: [Your Name]
+                    GitHub: [Your GitHub Profile]
+                    Version: 1.0
+                """),
+                offset=1
+            )
+        )
+    )
 )
+
+
 
 def server(input, output, session):
     game = reactive.Value(Game())
