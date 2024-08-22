@@ -1,7 +1,7 @@
 from shiny import App, reactive, render, ui
 import random
 from typing import Optional, Tuple
-from pathlib import Path
+#from pathlib import Path
 
 # Card constants
 CARD_VALUES = ["Blank", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
@@ -251,14 +251,9 @@ app_ui = ui.page_navbar(
                     offset=1
                 )
             ),
-            ui.tags.head(
-                ui.tags.link(rel="stylesheet", href="styles.css")  # Link to the custom CSS file
-            #    ui.tags.style("""
-            #         body {
-            #             background-color: #197C54; /* green background */
-            #         }
-            # """)
-            ),
+            #ui.tags.head(
+            #    ui.tags.link(rel="stylesheet", href="styles.css")  # Link to the custom CSS file
+            #),
         )
     ),
     ui.nav_panel("Instructions", 
@@ -391,7 +386,7 @@ def server(input, output, session):
         blank_str = str(game_instance.blank) if game_instance.blank else "None"
         return f"card_1: {card_1_str}, blank: {blank_str}"
 
-app_dir = Path(__file__).parent
+# app_dir = Path(__file__).parent
 
-app = App(app_ui, server, static_assets=app_dir / "www")
-#app = App(app_ui, server)
+#app = App(app_ui, server, static_assets=app_dir / "www")
+app = App(app_ui, server)
