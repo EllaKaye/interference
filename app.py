@@ -269,6 +269,16 @@ app_ui = ui.page_navbar(
                             box-shadow: none;
                         border: none;
                         }
+                        .action-button {
+                            color: white;
+                            border-color: white;
+                            background-color: #197C54;
+                        }
+                        .action-button:hover {
+                            background-color: white;
+                            color: #197C54;
+                            border-color: white;
+                        }
                     """)
             ),
         )
