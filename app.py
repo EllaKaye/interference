@@ -42,6 +42,22 @@ class Row(list):
         # We have looped over row and found all Blanks after Kings
         return True
 
+    def split_index(self):
+        if self[0].value_int != 2:
+            return 0
+        for i in range(1, len(self)):
+            if self[i].value_int != self[i - 1].value_int + 1:
+                return i
+        return len(self) - 1 # 12 (an ordered row with 2-K will still have a blank or other card at the end)
+
+    def split(self, index):
+        return self[:index], self[index:]
+
+    def fill_row(self, deck):
+        while len(self) < 13:
+            self.append(deck.pop())
+        return self
+
 
 class Rows(list):
     def get_card_indices(self, card: Card) -> Tuple[int, int]:
@@ -89,7 +105,12 @@ class Rows(list):
     def all_stuck(self):
         return all(row.is_stuck() for row in self)
 
-# The rest of the code remains the same...
+    def ordered_unordered(self):
+        indices = [row.split_index() for row in self]
+        split_rows = [row.split(i) for row, i in zip(self, indices)]
+        ordered = [item[0] for item in split_rows]
+        unordered = [element for item in split_rows for element in item[1]]
+        return ordered, unordered
 
 class Deck:
     def __init__(self):
@@ -119,8 +140,9 @@ class Game:
         self.blank: Optional[Card] = None
 
         # Game state
-        self.round = 1 # 3 rounds allowed, always start new game on round 1
-        self.round_over = self.rows.all_stuck() # need to allow for (unlikely) case that round is dealt over
+        self.round = 1
+        self.round_over = self.rows.all_stuck()
+        self.round_message = f"Round {self.round} of 3"
 
     def handle_click(self, clicked_card: Card) -> str:
         if clicked_card.value != "Blank" and not self.card_1 and not self.blank:
@@ -150,12 +172,47 @@ class Game:
 
         return "No action"
 
+    def new_round(self):
+        if self.round == 3:
+            return "Out of rounds"
+
+        self.round_over = False
+        self.round += 1
+        self.round_message = f"Round {self.round} of 3"
+
+        ordered, unordered = self.rows.ordered_unordered()
+        self.rows = Rows([Row(row) for row in ordered])
+
+        # separate out blanks for the rest
+        blanks = [card for card in unordered if card.value == "Blank"]
+        value_cards = [card for card in unordered if card.value != "Blank"]
+
+        # create and shuffle a deck of the unordered cards
+        unordered_deck = Deck()
+        unordered_deck.cards = value_cards
+        unordered_deck.shuffle()
+
+        # deal the blanks
+        for row in self.rows:
+            row.append(blanks.pop())
+
+        # deal the rest of the cards
+        for row in self.rows:
+            row.fill_row(unordered_deck.cards)
+
+        self.card_1 = None
+        self.blank = None
+
+        return f"Starting Round {self.round}"
+
 app_ui = ui.page_fluid(
     ui.h1("Solitaire Game"),
     ui.div(
         ui.input_action_button("new_game", "New Game"),
+        ui.input_action_button("new_round", "New Round"),
         style="margin-bottom: 10px;"
     ),
+    ui.output_text("round_info"),
     ui.output_ui("cards"),
     ui.output_text("clicked_card_text"),
     ui.output_text("debug_output"),
@@ -177,6 +234,20 @@ def server(input, output, session):
         clicked_card.set(None)
         debug_message.set("New game started")
         game_state.set(game_state() + 1)
+
+    @reactive.Effect
+    @reactive.event(input.new_round)
+    def _():
+        game_instance = game()
+        result = game_instance.new_round()
+        game.set(game_instance)
+        debug_message.set(result)
+        game_state.set(game_state() + 1)
+
+    @render.text
+    @reactive.event(game_state)
+    def round_info():
+        return game().round_message
 
     @render.ui
     @reactive.event(game_state)
