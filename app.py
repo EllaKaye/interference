@@ -24,19 +24,36 @@ class Card:
         return f"https://deckofcardsapi.com/static/img/{value}{self.suit[0]}.png"
 
 class Row(list):
-    pass
+    def is_stuck(self):
+        """A Row is stuck if all Blanks are after Kings"""
+
+        last_card_was_K = False
+
+        for card in self:
+            if card.value == "K":
+                last_card_was_K = True
+            elif card.value == "Blank":
+                if not last_card_was_K:
+                    return False # Found a Blank not after a King
+                # if we see a Blank after a K, or another Blank, do nothing
+            else:
+                last_card_was_K = False # reset flag for any other card
+
+        # We have looped over row and found all Blanks after Kings
+        return True
+
 
 class Rows(list):
     def get_card_indices(self, card: Card) -> Tuple[int, int]:
-        print(f"calling get_card_indices for card: {card}")
+        #print(f"calling get_card_indices for card: {card}")
         for i, row in enumerate(self):
-            print(f"Checking row {i}:")
+            #print(f"Checking row {i}:")
             for j, c in enumerate(row):
-                print(f"  Comparing with card at index {j}: {c}")
+                #print(f"  Comparing with card at index {j}: {c}")
                 if c.suit == card.suit and c.value == card.value:
-                    print(f"Debug: card found in row {i} at index {j}")
+                    #print(f"Debug: card found in row {i} at index {j}")
                     return i, j
-        print("Debug: card not found in any row")
+        #print("Debug: card not found in any row")
         return -1, -1  # Return invalid indices if card not found
 
     def get_test_card(self, card: Card) -> Optional[Card]:
@@ -50,10 +67,10 @@ class Rows(list):
 
     def is_valid_move(self, card1: Card, card2: Card) -> bool:
         test_card = self.get_test_card(card2)
-        print(f"Debug - is_valid_move: card1={card1}, card2={card2}, test_card={test_card}")  # Debug print
-        print(f"Debug - self.rows:")
-        for i, row in enumerate(self):
-            print(f"Row {i}: {' '.join(str(card) for card in row)}")
+        #print(f"Debug - is_valid_move: card1={card1}, card2={card2}, test_card={test_card}")  # Debug print
+        #print(f"Debug - self.rows:")
+        #for i, row in enumerate(self):
+        #    print(f"Row {i}: {' '.join(str(card) for card in row)}")
 
         if not test_card and card1.value_int == 2:
             return True
@@ -68,6 +85,9 @@ class Rows(list):
         row1, index1 = self.get_card_indices(card1)
         row2, index2 = self.get_card_indices(card2)
         self[row1][index1], self[row2][index2] = self[row2][index2], self[row1][index1]
+    
+    def all_stuck(self):
+        return all(row.is_stuck() for row in self)
 
 # The rest of the code remains the same...
 
@@ -98,6 +118,10 @@ class Game:
         self.card_1: Optional[Card] = None
         self.blank: Optional[Card] = None
 
+        # Game state
+        self.round = 1 # 3 rounds allowed, always start new game on round 1
+        self.round_over = self.rows.all_stuck() # need to allow for (unlikely) case that round is dealt over
+
     def handle_click(self, clicked_card: Card) -> str:
         if clicked_card.value != "Blank" and not self.card_1 and not self.blank:
             self.card_1 = clicked_card
@@ -113,6 +137,12 @@ class Game:
             if self.rows.is_valid_move(self.card_1, self.blank):
                 self.rows.swap_cards(self.card_1, self.blank)
                 self.card_1 = self.blank = None
+
+                # check if game is stuck
+                self.round_over = self.rows.all_stuck()
+                if self.round_over:
+                    print("Round over")
+
                 return "Valid move, cards swapped"
             else:
                 self.card_1 = self.blank = None
