@@ -234,13 +234,15 @@ app_ui = ui.page_navbar(
         ui.div(
             ui.row(
                 ui.column(10,
-                    ui.h1("Solitaire Game"),
                     ui.div(
                         ui.input_action_button("new_game", "New Game"),
                         ui.input_action_button("new_round", "New Round"),
                         style="margin-bottom: 10px;"
                     ),
-                    ui.output_text("round_info"),
+                    ui.div(
+                        ui.output_text("round_info"),
+                        style="margin-bottom: 10px"
+                    ),                 
                     ui.output_ui("cards"),
                     ui.output_text("clicked_card_text"),
                     ui.output_text("debug_output"),
@@ -326,7 +328,7 @@ def server(input, output, session):
                 .card-container { display: flex; flex-direction: column; }
                 .card-row { display: flex; justify-content: flex-start; margin-bottom: 20px; }
                 .card, .card-placeholder { margin: 2px; cursor: pointer; width: 100px; height: 140px; }
-                .card-placeholder { background-color: #f0f0f0; border: 1px dashed #ccc; }
+                .card-placeholder { background-color: #f0f0f0; border: 1px dashed #ccc; border-radius: 5px; }
             """),
             ui.div(
                 {"class": "card-container"},
