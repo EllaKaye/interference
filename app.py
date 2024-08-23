@@ -20,7 +20,7 @@ class Card:
 
     def image_url(self):
         if self.value == "Blank":
-            return "blank.png"
+            return "https://raw.githubusercontent.com/EllaKaye/interference-shiny/main/www/blank.png"
         value = "0" if self.value == "10" else self.value
         return f"https://deckofcardsapi.com/static/img/{value}{self.suit[0]}.png"
 
@@ -232,14 +232,7 @@ class Game:
 
         return f"Starting Round {self.round}"
 
-with open("about.md", "r") as file:
-    about = file.read()
-
-with open("instructions.md", "r") as file:
-    instructions = file.read()
-
 app_ui = ui.page_navbar(
-    #ui.tags.link(href="www/styles.css", rel="stylesheet"),
     ui.nav_panel("Interference",
         ui.div(
             ui.row(
@@ -263,29 +256,9 @@ app_ui = ui.page_navbar(
                     offset=1
                 )
             ),
-            ui.tags.head(
-                ui.tags.link(rel="stylesheet", href="styles.css")  # Link to the custom CSS file
-            ),
-        )
-    ),
-    ui.nav_panel("Instructions", 
-        ui.row(
-            ui.column(10,
-                ui.markdown(instructions),
-                offset=1
-            )
-        )
-    ),
-    ui.nav_panel("About",
-        ui.row(
-            ui.column(10,
-                ui.markdown(about),
-                offset=1
-            )
         )
     )
 )
-
 
 
 def server(input, output, session):
@@ -294,7 +267,6 @@ def server(input, output, session):
     debug_message = reactive.Value("")
     game_info_message = reactive.Value("")
     game_state = reactive.Value(0)
-    #game_info_message.set("New game started")
 
     @reactive.Effect
     @reactive.event(input.new_game)
