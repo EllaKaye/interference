@@ -1,5 +1,4 @@
 from shiny import App, ui, render, reactive
-from typing import Optional
 
 class Card:
     def __init__(self, value, suit):
@@ -18,9 +17,24 @@ class Rows(list):
         for i in range(4):
             self.append(deck[i*13:(i+1)*13])
 
-    def is_valid_move(self, card1, card2):
-        if card1.suit == card2.suit or card1.value == card2.value:
+    def swap_card(self, card1, card2):
+        pos1 = pos2 = None
+        for i, row in enumerate(self):
+            for j, card in enumerate(row):
+                if card.value == card1.value and card.suit == card1.suit:
+                    pos1 = (i, j)
+                elif card.value == card2.value and card.suit == card2.suit:
+                    pos2 = (i, j)
+                if pos1 and pos2:
+                    break
+            if pos1 and pos2:
+                break
+        
+        if pos1 and pos2:
+            self[pos1[0]][pos1[1]], self[pos2[0]][pos2[1]] = self[pos2[0]][pos2[1]], self[pos1[0]][pos1[1]]
+            print(f"Swapped cards: {card1.value}{card1.suit} with {card2.value}{card2.suit}")  # Debug print
             return True
+        print(f"Failed to swap cards: {card1.value}{card1.suit} with {card2.value}{card2.suit}")  # Debug print
         return False
 
 def get_deck():
@@ -31,49 +45,79 @@ def get_deck():
 app_ui = ui.page_fluid(
     ui.h1("Deck of Cards"),
     ui.output_ui("card_grid"),
-    ui.input_text("clicked_card", "Clicked Card", value=""),
-    ui.output_text("clicked_card_info")
+    ui.input_text("swap_cards", "Swap Cards", value=""),
+    ui.output_text("debug_output"),  # Debug output
+    ui.tags.script("""
+    function dragStart(event) {
+        event.dataTransfer.setData("text/plain", event.target.id);
+        console.log("Drag started:", event.target.id);  // Debug log
+    }
+
+    function allowDrop(event) {
+        event.preventDefault();
+    }
+
+    function drop(event) {
+        event.preventDefault();
+        var sourceId = event.dataTransfer.getData("text");
+        var targetId = event.target.closest('img').id;  // Get the ID of the closest img element
+        console.log("Drop - Source:", sourceId, "Target:", targetId);  // Debug log
+        if (sourceId !== targetId) {
+            Shiny.setInputValue('swap_cards', sourceId + ',' + targetId, {priority: 'event'});
+        }
+    }
+    """)
 )
 
 def server(input, output, session):
-    deck = reactive.Value(get_deck())
-    clicked_card = reactive.Value(None)
+    deck = reactive.Value(Rows(get_deck()))
 
     @output
     @render.ui
     def card_grid():
-        rows = Rows(deck.get())
+        rows = deck.get()
         ui_rows = []
         for row_index, row in enumerate(rows):
             ui_row = ui.div(
                 {"class": "d-flex justify-content-between mb-2"},
-                [ui.input_action_button(
-                    f"card_{row_index}_{col_index}",
-                    "",
-                    style=f"background-image: url({card.image_url()}); background-size: cover; width: 7%; height: 100px; border: none;",
-                    onclick=f"Shiny.setInputValue('clicked_card', '{card.value}:{card.suit}');"
+                [ui.div(
+                    ui.img(
+                        {"src": card.image_url(), 
+                         "draggable": "true",
+                         "ondragstart": "dragStart(event)",
+                         "ondrop": "drop(event)",
+                         "ondragover": "allowDrop(event)",
+                         "id": f"{card.value}:{card.suit}",
+                         "style": "width: 100%; height: 100%;"}
+                    ),
+                    {"style": "width: 7%; height: 100px;"}
                 ) for col_index, card in enumerate(row)]
             )
             ui_rows.append(ui_row)
-        return ui.div(
-            ui_rows,
-            ui.tags.style("#clicked_card { display: none; }")
-        )
+        return ui.div(ui_rows)
 
     @reactive.Effect
-    @reactive.event(input.clicked_card)
-    def update_clicked_card():
-        if input.clicked_card():
-            value, suit = input.clicked_card().split(":")
-            new_card = Card(value, suit)
-            clicked_card.set(new_card)
+    @reactive.event(input.swap_cards)
+    def handle_swap():
+        if input.swap_cards():
+            print(f"Swap cards input received: {input.swap_cards()}")  # Debug print
+            card1_id, card2_id = input.swap_cards().split(',')
+            card1_value, card1_suit = card1_id.split(':')
+            card2_value, card2_suit = card2_id.split(':')
+            card1 = Card(card1_value, card1_suit)
+            card2 = Card(card2_value, card2_suit)
+            current_deck = deck.get()
+            if current_deck.swap_card(card1, card2):
+                deck.set(Rows(sum(current_deck, [])))  # Create a new Rows object to trigger reactivity
 
     @output
     @render.text
-    def clicked_card_info():
-        card = clicked_card.get()
-        if card:
-            return f"Clicked card: {card.value} of {card.suit}"
-        return "No card clicked yet"
+    def debug_output():
+        # Display the first few cards of each row for debugging
+        rows = deck.get()
+        debug_str = "Current Deck State:\n"
+        for i, row in enumerate(rows):
+            debug_str += f"Row {i+1}: " + ", ".join([f"{card.value}{card.suit[0]}" for card in row[:5]]) + "...\n"
+        return debug_str
 
 app = App(app_ui, server)
