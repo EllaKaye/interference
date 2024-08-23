@@ -1,7 +1,7 @@
 from shiny import App, reactive, render, ui
 import random
 from typing import Optional, Tuple
-#from pathlib import Path
+from pathlib import Path
 
 # Card constants
 CARD_VALUES = ["Blank", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
@@ -20,7 +20,7 @@ class Card:
 
     def image_url(self):
         if self.value == "Blank":
-            return ""
+            return "blank.png"
         value = "0" if self.value == "10" else self.value
         return f"https://deckofcardsapi.com/static/img/{value}{self.suit[0]}.png"
 
@@ -237,6 +237,7 @@ with open("instructions.md", "r") as file:
     instructions = file.read()
 
 app_ui = ui.page_navbar(
+    #ui.tags.link(href="www/styles.css", rel="stylesheet"),
     ui.nav_panel("Game",
         ui.div(
             ui.row(
@@ -372,8 +373,8 @@ def server(input, output, session):
                         {"class": "card-row"},
                         [
                             ui.div(
-                                ui.img(src=card.image_url(), style="width: 90px; height: 126px;") if card.value != "Blank" else "",
-                                class_="card" if card.value != "Blank" else "card-placeholder",
+                                ui.img(src=card.image_url(), style="width: 90px; height: 126px;"), #if card.value != "Blank" else "",
+                                class_="card", #if card.value != "Blank" else "card-placeholder",
                                 onclick=f"Shiny.setInputValue('clicked_card', '{card.suit}:{card.value}')"
                             )
                             for card in row
@@ -421,7 +422,7 @@ def server(input, output, session):
         blank_str = str(game_instance.blank) if game_instance.blank else "None"
         return f"card_1: {card_1_str}, blank: {blank_str}"
 
-# app_dir = Path(__file__).parent
+app_dir = Path(__file__).parent
 
-#app = App(app_ui, server, static_assets=app_dir / "www")
-app = App(app_ui, server)
+app = App(app_ui, server, static_assets=app_dir / "www")
+#app = App(app_ui, server)
