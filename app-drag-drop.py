@@ -22,7 +22,7 @@ class Rows(list):
             return True
         return False
 
-    def swap_card(self, card1, card2):
+    def swap_cards(self, card1, card2):
         if not self.is_valid_move(card1, card2):
             print(f"Invalid move: {card1.value}{card1.suit} with {card2.value}{card2.suit}")
             return False
@@ -115,7 +115,7 @@ def server(input, output, session):
             card1 = Card(card1_value, card1_suit)
             card2 = Card(card2_value, card2_suit)
             current_deck = deck.get()
-            if current_deck.swap_card(card1, card2):
+            if current_deck.swap_cards(card1, card2):
                 deck.set(Rows(sum(current_deck, [])))  # Create a new Rows object to trigger reactivity
 
     @output
