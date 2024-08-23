@@ -1,3 +1,30 @@
 body {
+    background-color: #156645; /* green background */
+    color: white;
+}
+.card img {
+    box-shadow: none;
+    border: none;
+    display: block;
+    background-color: #156645;
+}
+.card, .card-placeholder {
+    box-shadow: none;
+border: none;
+}
+.action-button {
+    color: white;
+    border-color: white;
     background-color: #197C54;
+}
+.action-button:hover {
+    background-color: white;
+    color: #197C54;
+    border-color: white;
+}
+.navbar-nav .nav-link {
+    color: #115439 !important;
+    font-size: 18px;
+    text-transform: uppercase;
+    transition: color 0.3s;
 }
