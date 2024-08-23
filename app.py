@@ -238,7 +238,7 @@ with open("instructions.md", "r") as file:
 
 app_ui = ui.page_navbar(
     #ui.tags.link(href="www/styles.css", rel="stylesheet"),
-    ui.nav_panel("Game",
+    ui.nav_panel("Interference",
         ui.div(
             ui.row(
                 ui.column(10,
