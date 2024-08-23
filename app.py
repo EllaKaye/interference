@@ -158,7 +158,8 @@ class Game:
         # Game state
         self.round = 1
         self.round_over = self.rows.all_stuck()
-        self.round_message = f"Round {self.round} of 3"
+        #self.round_message = f"Round {self.round} of 3"
+        self.game_info_message = f"Round {self.round} of 3"
         self.won = None
 
     def handle_click(self, clicked_card: Card) -> str:
@@ -183,11 +184,11 @@ class Game:
                     # check if game is won or lost
                     self.won = self.rows.all_ordered()
                     if self.won:
-                        print("You won!")
+                        self.game_info_message = "You won!"
                     elif self.round == 3 and not self.won:
-                        print("Game over. You lost.")
+                        self.game_info_message = "Game over. Click 'New Game' to try again."
                     else:
-                        print("Round over. Click 'New Round' to continue")
+                        self.game_info_message = "Round over. Click 'New Round' to continue."
 
 
                 return "Valid move, cards swapped"
@@ -199,11 +200,12 @@ class Game:
 
     def new_round(self):
         if self.round == 3:
+            self.game_info_message = "Out of rounds. Click 'New Game' to start again."
             return "Out of rounds"
 
         self.round_over = False
         self.round += 1
-        self.round_message = f"Round {self.round} of 3"
+        self.game_info_message = f"Round {self.round} of 3"
 
         ordered, unordered = self.rows.ordered_unordered()
         self.rows = Rows([Row(row) for row in ordered])
@@ -292,7 +294,7 @@ def server(input, output, session):
     debug_message = reactive.Value("")
     game_info_message = reactive.Value("")
     game_state = reactive.Value(0)
-    game_info_message.set("New game started")
+    #game_info_message.set("New game started")
 
     @reactive.Effect
     @reactive.event(input.new_game)
@@ -375,8 +377,9 @@ def server(input, output, session):
         return debug_message()
 
     @render.text
+    @reactive.event(game_state)
     def game_info_output():
-        return game_info_message()
+        return game().game_info_message
 
     @render.text
     @reactive.event(game_state)
