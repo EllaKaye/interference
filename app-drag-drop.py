@@ -54,7 +54,6 @@ def get_deck():
 app_ui = ui.page_fluid(
     ui.h1("Deck of Cards"),
     ui.output_ui("card_grid"),
-    ui.input_text("swap_cards", "Swap Cards", value=""),
     ui.output_text("debug_output"),  # Debug output
     ui.tags.script("""
     function dragStart(event) {
