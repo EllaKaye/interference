@@ -230,6 +230,12 @@ class Game:
 
         return f"Starting Round {self.round}"
 
+with open("about.md", "r") as file:
+    about = file.read()
+
+with open("instructions.md", "r") as file:
+    instructions = file.read()
+
 app_ui = ui.page_navbar(
     ui.nav_panel("Game",
         ui.div(
@@ -297,18 +303,7 @@ app_ui = ui.page_navbar(
     ui.nav_panel("Instructions", 
         ui.row(
             ui.column(10,
-                ui.markdown("""
-                    ## How to Play
-
-                    1. The game consists of four rows of 13 cards each.
-                    2. Your goal is to arrange each row in ascending order from 2 to King, followed by a blank card.
-                    3. Click on a card to select it, then click on a blank card to move the selected card there.
-                    4. You can only move a card to a blank space if it's the next card in sequence and of the same suit.
-                    5. The game ends when all rows are correctly ordered or when you run out of moves.
-                    6. You have three rounds to complete the game.
-
-                    Good luck!
-                """),
+                ui.markdown(instructions),
                 offset=1
             )
         )
@@ -316,13 +311,7 @@ app_ui = ui.page_navbar(
     ui.nav_panel("About",
         ui.row(
             ui.column(10,
-                ui.markdown("""
-                    ## About This Game
-
-                    Developed by: [Your Name]
-                    GitHub: [Your GitHub Profile]
-                    Version: 1.0
-                """),
+                ui.markdown(about),
                 offset=1
             )
         )
