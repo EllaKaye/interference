@@ -17,7 +17,16 @@ class Rows(list):
         for i in range(4):
             self.append(deck[i*13:(i+1)*13])
 
+    def is_valid_move(self, card1, card2):
+        if card1.suit == card2.suit or card1.value == card2.value:
+            return True
+        return False
+
     def swap_card(self, card1, card2):
+        if not self.is_valid_move(card1, card2):
+            print(f"Invalid move: {card1.value}{card1.suit} with {card2.value}{card2.suit}")
+            return False
+
         pos1 = pos2 = None
         for i, row in enumerate(self):
             for j, card in enumerate(row):
