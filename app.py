@@ -245,16 +245,15 @@ app_ui = ui.page_navbar(
                     ui.div(
                         ui.input_action_button("new_game", "New Game"),
                         ui.input_action_button("new_round", "New Round"),
-                        style="margin-bottom: 10px;"
                     ),
                     ui.div(
                         ui.output_text("game_info_output"),
                         style="margin-bottom: 10px; font-size: 120%"
                     ), 
-                    ui.div(
-                        ui.output_text("round_info"),
-                        style="margin-bottom: 10px;"
-                    ),                    
+                    #ui.div(
+                    #    ui.output_text("round_info"),
+                    #    style="margin-bottom: 10px;"
+                    #),                    
                     ui.output_ui("cards"),
                     ui.output_text("clicked_card_text"),
                     ui.output_text("debug_output"),
@@ -329,7 +328,7 @@ def server(input, output, session):
             ui.tags.style("""
                 .card-container { display: flex; flex-direction: column; }
                 .card-row { display: flex; justify-content: flex-start; margin-bottom: 20px; }
-                .card, .card-placeholder { margin: 2px; cursor: pointer; width: 90px; height: 126px; }
+                .card, .card-placeholder { margin-right: 4px; cursor: pointer; width: 90px; height: 126px; }
                 .card-placeholder { background-color: #197C54; border-radius: 5px; }
             """),
             ui.div(

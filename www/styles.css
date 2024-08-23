@@ -18,6 +18,7 @@ border: none;
     background-color: #197C54;
     padding: 12px 18px;
     margin-right: 6px;
+    margin-bottom: 10px;
 }
 .action-button:hover {
     background-color: white;
