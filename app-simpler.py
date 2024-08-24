@@ -65,6 +65,10 @@ class Rows(list):
             return False
 
     def swap_cards(self, card1: Card, card2: Card):
+        if not self.is_valid_move(card1, card2):
+            print(f"Invalid move: {card1.value}{card1.suit} with {card2.value}{card2.suit}")
+            return False
+
         row1, index1 = self.get_card_indices(card1)
         row2, index2 = self.get_card_indices(card2)
         self[row1][index1], self[row2][index2] = self[row2][index2], self[row1][index1]
@@ -140,9 +144,9 @@ app_ui = ui.page_navbar(
                         style="margin-bottom: 10px; font-size: 120%"
                     ),                    
                     ui.output_ui("cards"),
-                    ui.output_text("clicked_card_text"),
+                    #ui.output_text("clicked_card_text"),
                     ui.output_text("debug_output"),
-                    ui.output_text("card_1_and_blank"),
+                    #ui.output_text("card_1_and_blank"),
                     offset=1
                 )
             ),
