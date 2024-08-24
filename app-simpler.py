@@ -138,18 +138,34 @@ app_ui = ui.page_navbar(
                     ui.div(
                         ui.output_text("game_info_output"),
                         style="margin-bottom: 10px; font-size: 120%"
-                    ), 
-                    #ui.div(
-                    #    ui.output_text("round_info"),
-                    #    style="margin-bottom: 10px;"
-                    #),                    
+                    ),                    
                     ui.output_ui("cards"),
                     ui.output_text("clicked_card_text"),
                     ui.output_text("debug_output"),
                     ui.output_text("card_1_and_blank"),
                     offset=1
                 )
-            )
+            ),
+            ui.tags.script("""
+            function dragStart(event) {
+                event.dataTransfer.setData("text/plain", event.target.id);
+                console.log("Drag started:", event.target.id);  // Debug log
+            }
+
+            function allowDrop(event) {
+                event.preventDefault();
+            }
+
+            function drop(event) {
+                event.preventDefault();
+                var sourceId = event.dataTransfer.getData("text");
+                var targetId = event.target.closest('img').id;  // Get the ID of the closest img element
+                console.log("Drop - Source:", sourceId, "Target:", targetId);  // Debug log
+                if (sourceId !== targetId) {
+                    Shiny.setInputValue('swap_cards', sourceId + ',' + targetId, {priority: 'event'});
+                }
+            }
+            """)            
         )
     )
 )
@@ -192,7 +208,15 @@ def server(input, output, session):
                         {"class": "card-row"},
                         [
                             ui.div(
-                                ui.img(src=card.image_url(), style="width: 90px; height: 126px;"), 
+                                ui.img(
+                                    {"src": card.image_url(), 
+                                    "draggable": "true",
+                                    "ondragstart": "dragStart(event)",
+                                    "ondrop": "drop(event)",
+                                    "ondragover": "allowDrop(event)",
+                                    "id": f"{card.value}:{card.suit}",
+                                    "style": "width: 90px; height: 126px;"}
+                                ), 
                                 class_="card", 
                                 onclick=f"Shiny.setInputValue('clicked_card', '{card.suit}:{card.value}')"
                             )
