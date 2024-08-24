@@ -1,6 +1,7 @@
 from shiny import App, reactive, render, ui
 import random
 from typing import Optional, Tuple
+from pathlib import Path
 
 # Card constants
 CARD_VALUES = ["Blank", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
@@ -126,26 +127,7 @@ app_ui = ui.page_navbar(
                     offset=1
                 )
             ),
-            ui.tags.script("""
-            function dragStart(event) {
-                event.dataTransfer.setData("text/plain", event.target.id);
-                console.log("Drag started:", event.target.id);
-            }
-
-            function allowDrop(event) {
-                event.preventDefault();
-            }
-
-            function drop(event) {
-                event.preventDefault();
-                var sourceId = event.dataTransfer.getData("text");
-                var targetId = event.target.closest('img').id;
-                console.log("Drop - Source:", sourceId, "Target:", targetId);
-                if (sourceId !== targetId) {
-                    Shiny.setInputValue('swap_cards', {source: sourceId, target: targetId}, {priority: 'event'});
-                }
-            }
-            """)            
+            ui.tags.script(src="drag-drop.js")            
         )
     )
 )
@@ -232,4 +214,6 @@ def server(input, output, session):
     def game_info_output():
         return game().game_info_message
 
-app = App(app_ui, server)
+app_dir = Path(__file__).parent
+
+app = App(app_ui, server, static_assets=app_dir / "www")
