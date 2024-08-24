@@ -244,6 +244,7 @@ with open("about.md", "r") as file:
 with open("instructions.md", "r") as file:
     instructions = file.read()
 
+# Written with help from Shiny Assistant
 app_ui = ui.page_navbar(
     #ui.tags.link(href="www/styles.css", rel="stylesheet"),
     ui.nav_panel("Interference",
@@ -293,7 +294,7 @@ app_ui = ui.page_navbar(
 )
 
 
-
+# Written with help from Shiny Assistant
 def server(input, output, session):
     game = reactive.Value(Game())
     clicked_card: reactive.Value[Optional[Card]] = reactive.Value(None)
