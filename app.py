@@ -45,30 +45,17 @@ class Row(list):
         # We have looped over row and found all Blanks after Kings
         return True
 
-    def is_ordered(self):
-        if len(self) != 13:
-            return False
-
-        # Check if the first 12 cards are in order and of the same suit
-        suit = self[0].suit
-        # Check the first 12 cards, for suit and value
-        for i in range(12):
-            if self[i].suit != suit or self[i].value_int != i:
-                return False
-
-        # Check if the last card is a Blank
-        # At this point, whole row is ordered if so
-        return self[12].value == "Blank"
-
     def split_index(self):
-        if self[0].value != "2":
+        if self[0].value != "2":  # no cards in order
             return 0
+
+        suit = self[0].suit
         for i in range(1, len(self)):
-            if self[i].value_int != self[i - 1].value_int + 1:
+            if self[i].suit != suit or self[i].value_int != i:
                 return i
         return (
-            len(self) - 1
-        )  # 12 (an ordered row with 2-K will still have a blank or other card at the end)
+            len(self) - 1  # if row is fully ordered, allow Blank at end
+        ) 
 
     def split(self, index):
         return self[:index], self[index:]
@@ -77,6 +64,9 @@ class Row(list):
         while len(self) < 13:
             self.append(deck.pop())
         return self
+
+    def is_ordered(self):
+        return self.split_index() == 12
 
 
 class Rows(list):
