@@ -4,10 +4,26 @@ from typing import Optional, Tuple
 from pathlib import Path
 
 # Card constants
-CARD_VALUES = ["Blank", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
+CARD_VALUES = [
+    "Blank",
+    "A",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "J",
+    "Q",
+    "K",
+]
 CARD_SUITS = ["S", "H", "D", "C"]
-SUIT_ICONS = {"S": "♠️", "H": "♥️", "D": "♦️", "C": "♣️"} # for nicer print method
+SUIT_ICONS = {"S": "♠️", "H": "♥️", "D": "♦️", "C": "♣️"}  # for nicer print method
 VALUES_INT = {value: index for index, value in enumerate(CARD_VALUES)}
+
 
 class Card:
     def __init__(self, suit, value):
@@ -21,8 +37,9 @@ class Card:
     def image_url(self):
         if self.value == "Blank":
             return "blank.png"
-        value = "0" if self.value == "10" else self.value # for deckofcardsapi
+        value = "0" if self.value == "10" else self.value  # for deckofcardsapi
         return f"https://deckofcardsapi.com/static/img/{value}{self.suit}.png"
+
 
 class Row(list):
     def is_stuck(self):
@@ -35,10 +52,10 @@ class Row(list):
                 last_card_was_K = True
             elif card.value == "Blank":
                 if not last_card_was_K:
-                    return False # Found a Blank not after a King
+                    return False  # Found a Blank not after a King
                 # if we see a Blank after a K, or another Blank, do nothing
             else:
-                last_card_was_K = False # reset flag for any other card
+                last_card_was_K = False  # reset flag for any other card
 
         # We have looped over row and found all Blanks after Kings
         return True
@@ -46,13 +63,13 @@ class Row(list):
     def is_ordered(self):
         if len(self) != 13:
             return False
-        
+
         # Check if the first 12 cards are in order and of the same suit
         suit = self[0].suit
         for i in range(12):
             if self[i].suit != suit or self[i].value_int != i + 2:
                 return False
-        
+
         # Check if the last card is a Blank
         # At this point, whole row is ordered if so
         return self[12].value == "Blank"
@@ -63,7 +80,9 @@ class Row(list):
         for i in range(1, len(self)):
             if self[i].value_int != self[i - 1].value_int + 1:
                 return i
-        return len(self) - 1 # 12 (an ordered row with 2-K will still have a blank or other card at the end)
+        return (
+            len(self) - 1
+        )  # 12 (an ordered row with 2-K will still have a blank or other card at the end)
 
     def split(self, index):
         return self[:index], self[index:]
@@ -72,6 +91,7 @@ class Row(list):
         while len(self) < 13:
             self.append(deck.pop())
         return self
+
 
 class Rows(list):
     def get_card_indices(self, card: Card) -> Tuple[int, int]:
@@ -88,7 +108,7 @@ class Rows(list):
         if card_index == 0:
             return None  # If the card is at the start of a row, there's no card to test against
         else:
-            return self[card_row][card_index - 1] # the card to the left of `card`
+            return self[card_row][card_index - 1]  # the card to the left of `card`
 
     def is_valid_move(self, card1: Card, card2: Card) -> bool:
         test_card = self.get_test_card(card2)
@@ -97,7 +117,9 @@ class Rows(list):
             return True
         elif not test_card:
             return False
-        elif card1.suit == test_card.suit and card1.value_int == (test_card.value_int + 1):
+        elif card1.suit == test_card.suit and card1.value_int == (
+            test_card.value_int + 1
+        ):
             return True
         else:
             return False
@@ -105,14 +127,16 @@ class Rows(list):
     def swap_cards(self, card1: Card, card2: Card):
         # Only allow swaps on if valid
         if not self.is_valid_move(card1, card2):
-            print(f"Invalid move: {card1.value}{card1.suit} with {card2.value}{card2.suit}")
+            print(
+                f"Invalid move: {card1.value}{card1.suit} with {card2.value}{card2.suit}"
+            )
             return False
 
         row1, index1 = self.get_card_indices(card1)
         row2, index2 = self.get_card_indices(card2)
         self[row1][index1], self[row2][index2] = self[row2][index2], self[row1][index1]
         return True
-    
+
     def all_stuck(self):
         return all(row.is_stuck() for row in self)
 
@@ -126,9 +150,15 @@ class Rows(list):
     def all_ordered(self):
         return all(row.is_ordered() for row in self)
 
+
 class Deck:
     def __init__(self):
-        self.cards = [Card(suit, value) for suit in CARD_SUITS for value in CARD_VALUES if value != "A"]
+        self.cards = [
+            Card(suit, value)
+            for suit in CARD_SUITS
+            for value in CARD_VALUES
+            if value != "A"
+        ]
 
     def shuffle(self):
         random.shuffle(self.cards)
@@ -139,8 +169,9 @@ class Deck:
     def to_rows(self):
         rows = Rows()
         for i in range(4):
-            rows.append(Row(self.cards[i*13:(i+1)*13]))
+            rows.append(Row(self.cards[i * 13 : (i + 1) * 13]))
         return rows
+
 
 class Game:
     def __init__(self):
@@ -160,14 +191,14 @@ class Game:
     def handle_swap(self, card1_id: str, card2_id: str) -> str:
         # Don't allow swaps if round is over (no valid swaps anyway)
         if self.round_over:
-            return f"Can't move card when the round/game is over"
+            return "Can't move card when the round/game is over"
 
         card1_value, card1_suit = card1_id.split(":")
         card2_value, card2_suit = card2_id.split(":")
-        
+
         card1 = Card(card1_suit, card1_value)
         card2 = Card(card2_suit, card2_value)
-        
+
         if self.rows.swap_cards(card1, card2):
             # after swap, check new game state
             self.round_over = self.rows.all_stuck()
@@ -178,12 +209,13 @@ class Game:
                 elif self.round == 3 and not self.won:
                     self.game_info_message = "Game over. Click 'New Game' to try again."
                 else:
-                    self.game_info_message = "Round over. Click 'New Round' to continue."
+                    self.game_info_message = (
+                        "Round over. Click 'New Round' to continue."
+                    )
 
             return f"Swapped {card1} with {card2}"
         else:
             return f"Invalid move: Cannot swap {card1} with {card2}"
-
 
     def new_round(self):
         if self.round == 3:
@@ -216,6 +248,7 @@ class Game:
 
         return f"Starting Round {self.round}"
 
+
 with open("about.md", "r") as file:
     about = file.read()
 
@@ -224,45 +257,33 @@ with open("instructions.md", "r") as file:
 
 # Written with help from Shiny Assistant
 app_ui = ui.page_navbar(
-    ui.nav_panel("Interference",
+    ui.nav_panel(
+        "Interference",
         ui.div(
             ui.row(
-                ui.column(10,
+                ui.column(
+                    10,
                     ui.div(
                         ui.input_action_button("new_game", "New Game"),
                         ui.input_action_button("new_round", "New Round"),
                     ),
                     ui.div(
                         ui.output_text("game_info_output"),
-                        style="margin-bottom: 10px; font-size: 120%"
-                    ),                    
+                        style="margin-bottom: 10px; font-size: 120%",
+                    ),
                     ui.output_ui("cards"),
-                    #ui.output_text("debug_output"),
-                    offset=1
+                    # ui.output_text("debug_output"),
+                    offset=1,
                 )
             ),
-            ui.tags.script(src="drag-drop.js"), 
-            ui.tags.head(
-                ui.tags.link(rel="stylesheet", href="styles.css")  
-            ),
-        )
+            ui.tags.script(src="drag-drop.js"),
+            ui.tags.head(ui.tags.link(rel="stylesheet", href="styles.css")),
+        ),
     ),
-    ui.nav_panel("Instructions", 
-        ui.row(
-            ui.column(10,
-                ui.markdown(instructions),
-                offset=1
-            )
-        )
+    ui.nav_panel(
+        "Instructions", ui.row(ui.column(10, ui.markdown(instructions), offset=1))
     ),
-    ui.nav_panel("About",
-        ui.row(
-            ui.column(10,
-                ui.markdown(about),
-                offset=1
-            )
-        )
-    )
+    ui.nav_panel("About", ui.row(ui.column(10, ui.markdown(about), offset=1))),
 )
 
 
@@ -295,17 +316,18 @@ def server(input, output, session):
         debug_message.set(result)
         game_state.set(game_state() + 1)
 
-
     @render.ui
     @reactive.event(game_state)
     def cards():
         rows = game().rows
         return ui.div(
-            ui.tags.style("""
+            ui.tags.style(
+                """
                 .card-container { display: flex; flex-direction: column; }
                 .card-row { display: flex; justify-content: flex-start; margin-bottom: 20px; }
                 .card { margin-right: 4px; cursor: pointer; width: 90px; height: 126px; }
-            """),
+            """
+            ),
             ui.div(
                 {"class": "card-container"},
                 [
@@ -314,21 +336,24 @@ def server(input, output, session):
                         [
                             ui.div(
                                 ui.img(
-                                    {"src": card.image_url(), 
-                                    "draggable": "true",
-                                    "ondragstart": "dragStart(event)",
-                                    "ondrop": "drop(event)",
-                                    "ondragover": "allowDrop(event)",
-                                    "id": f"{card.value}:{card.suit}",
-                                    "style": "width: 90px; height: 126px;"}
-                                ), 
-                                class_="card", 
+                                    {
+                                        "src": card.image_url(),
+                                        "draggable": "true",
+                                        "ondragstart": "dragStart(event)",
+                                        "ondrop": "drop(event)",
+                                        "ondragover": "allowDrop(event)",
+                                        "id": f"{card.value}:{card.suit}",
+                                        "style": "width: 90px; height: 126px;",
+                                    }
+                                ),
+                                class_="card",
                             )
                             for card in row
-                        ]
-                    ) for row in rows
-                ]
-            )
+                        ],
+                    )
+                    for row in rows
+                ],
+            ),
         )
 
     @reactive.Effect
@@ -336,7 +361,9 @@ def server(input, output, session):
     def _():
         if input.swap_cards():
             game_instance = game()
-            result = game_instance.handle_swap(input.swap_cards()["source"], input.swap_cards()["target"])
+            result = game_instance.handle_swap(
+                input.swap_cards()["source"], input.swap_cards()["target"]
+            )
             game.set(game_instance)
             debug_message.set(result)
             game_state.set(game_state() + 1)  # Trigger UI update
@@ -349,6 +376,7 @@ def server(input, output, session):
     @reactive.event(game_state)
     def game_info_output():
         return game().game_info_message
+
 
 app_dir = Path(__file__).parent
 
