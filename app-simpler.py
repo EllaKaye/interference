@@ -5,8 +5,8 @@ from pathlib import Path
 
 # Card constants
 CARD_VALUES = ["Blank", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
-CARD_SUITS = ["Clubs", "Hearts", "Spades", "Diamonds"]
-SUIT_ICONS = {"Spades": "♠️", "Clubs": "♣️", "Hearts": "♥️", "Diamonds": "♦️"}
+CARD_SUITS = ["C", "H", "S", "D"]
+SUIT_ICONS = {"S": "♠️", "C": "♣️", "H": "♥️", "D": "♦️"}
 VALUES_INT = {value: index for index, value in enumerate(CARD_VALUES)}
 
 class Card:
@@ -21,8 +21,8 @@ class Card:
     def image_url(self):
         if self.value == "Blank":
             return "https://raw.githubusercontent.com/EllaKaye/interference-shiny/main/www/blank.png"
-        value = "0" if self.value == "10" else self.value
-        return f"https://deckofcardsapi.com/static/img/{value}{self.suit[0]}.png"
+        value = "0" if self.value == "10" else self.value # for deckofcardsapi
+        return f"https://deckofcardsapi.com/static/img/{value}{self.suit}.png"
 
 class Row(list):
     pass

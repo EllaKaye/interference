@@ -5,8 +5,8 @@ from pathlib import Path
 
 # Card constants
 CARD_VALUES = ["Blank", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
-CARD_SUITS = ["Clubs", "Hearts", "Spades", "Diamonds"]
-SUIT_ICONS = {"Spades": "♠️", "Clubs": "♣️", "Hearts": "♥️", "Diamonds": "♦️"}
+CARD_SUITS = ["C", "H", "S", "D"]
+SUIT_ICONS = {"S": "♠️", "C": "♣️", "H": "♥️", "D": "♦️"} # for nicer print method
 VALUES_INT = {value: index for index, value in enumerate(CARD_VALUES)}
 
 class Card:
@@ -21,8 +21,8 @@ class Card:
     def image_url(self):
         if self.value == "Blank":
             return "blank.png"
-        value = "0" if self.value == "10" else self.value
-        return f"https://deckofcardsapi.com/static/img/{value}{self.suit[0]}.png"
+        value = "0" if self.value == "10" else self.value # for deckofcardsapi
+        return f"https://deckofcardsapi.com/static/img/{value}{self.suit}.png"
 
 class Row(list):
     def is_stuck(self):
@@ -54,10 +54,11 @@ class Row(list):
                 return False
         
         # Check if the last card is a Blank
+        # At this point, whole row is ordered if so
         return self[12].value == "Blank"
 
     def split_index(self):
-        if self[0].value_int != 2:
+        if self[0].value != "2":
             return 0
         for i in range(1, len(self)):
             if self[i].value_int != self[i - 1].value_int + 1:
@@ -90,7 +91,7 @@ class Rows(list):
         if card_row == -1 or card_index == -1:
             return None
         if card_index == 0:
-            return None  # If the card is at the start of a row, test_card should be None
+            return None  # If the card is at the start of a row, there's no card to test against
         else:
             return self[card_row][card_index - 1]
 
@@ -111,6 +112,11 @@ class Rows(list):
             return False
 
     def swap_cards(self, card1: Card, card2: Card):
+        # Only allow swaps on if valid
+        if not self.is_valid_move(card1, card2):
+            print(f"Invalid move: {card1.value}{card1.suit} with {card2.value}{card2.suit}")
+            return False
+
         row1, index1 = self.get_card_indices(card1)
         row2, index2 = self.get_card_indices(card2)
         self[row1][index1], self[row2][index2] = self[row2][index2], self[row1][index1]
