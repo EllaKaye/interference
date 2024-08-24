@@ -5,8 +5,8 @@ from pathlib import Path
 
 # Card constants
 CARD_VALUES = ["Blank", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
-CARD_SUITS = ["C", "H", "S", "D"]
-SUIT_ICONS = {"S": "♠️", "C": "♣️", "H": "♥️", "D": "♦️"} # for nicer print method
+CARD_SUITS = ["S", "H", "D", "C"]
+SUIT_ICONS = {"S": "♠️", "H": "♥️", "D": "♦️", "C": "♣️"} # for nicer print method
 VALUES_INT = {value: index for index, value in enumerate(CARD_VALUES)}
 
 class Card:
@@ -75,15 +75,10 @@ class Row(list):
 
 class Rows(list):
     def get_card_indices(self, card: Card) -> Tuple[int, int]:
-        #print(f"calling get_card_indices for card: {card}")
         for i, row in enumerate(self):
-            #print(f"Checking row {i}:")
             for j, c in enumerate(row):
-                #print(f"  Comparing with card at index {j}: {c}")
                 if c.suit == card.suit and c.value == card.value:
-                    #print(f"Debug: card found in row {i} at index {j}")
                     return i, j
-        #print("Debug: card not found in any row")
         return -1, -1  # Return invalid indices if card not found
 
     def get_test_card(self, card: Card) -> Optional[Card]:
@@ -93,14 +88,10 @@ class Rows(list):
         if card_index == 0:
             return None  # If the card is at the start of a row, there's no card to test against
         else:
-            return self[card_row][card_index - 1]
+            return self[card_row][card_index - 1] # the card to the left of `card`
 
     def is_valid_move(self, card1: Card, card2: Card) -> bool:
         test_card = self.get_test_card(card2)
-        #print(f"Debug - is_valid_move: card1={card1}, card2={card2}, test_card={test_card}")  # Debug print
-        #print(f"Debug - self.rows:")
-        #for i, row in enumerate(self):
-        #    print(f"Row {i}: {' '.join(str(card) for card in row)}")
 
         if not test_card and card1.value_int == 2:
             return True
@@ -159,13 +150,10 @@ class Game:
         self.deck = Deck()
         self.deck.shuffle()
         self.rows = self.deck.to_rows()
-        #self.card_1: Optional[Card] = None
-        #self.blank: Optional[Card] = None
 
         # Game state
         self.round = 1
         self.round_over = self.rows.all_stuck()
-        #self.round_message = f"Round {self.round} of 3"
         self.game_info_message = f"Round {self.round} of 3"
         self.won = None
 
@@ -226,9 +214,6 @@ class Game:
         for row in self.rows:
             row.fill_row(unordered_deck.cards)
 
-        self.card_1 = None
-        self.blank = None
-
         return f"Starting Round {self.round}"
 
 with open("about.md", "r") as file:
@@ -239,7 +224,6 @@ with open("instructions.md", "r") as file:
 
 # Written with help from Shiny Assistant
 app_ui = ui.page_navbar(
-    #ui.tags.link(href="www/styles.css", rel="stylesheet"),
     ui.nav_panel("Interference",
         ui.div(
             ui.row(
@@ -251,13 +235,9 @@ app_ui = ui.page_navbar(
                     ui.div(
                         ui.output_text("game_info_output"),
                         style="margin-bottom: 10px; font-size: 120%"
-                    ), 
-                    #ui.div(
-                    #    ui.output_text("round_info"),
-                    #    style="margin-bottom: 10px;"
-                    #),                    
+                    ),                    
                     ui.output_ui("cards"),
-                    ui.output_text("debug_output"),
+                    #ui.output_text("debug_output"),
                     offset=1
                 )
             ),
@@ -293,7 +273,6 @@ def server(input, output, session):
     debug_message = reactive.Value("")
     game_info_message = reactive.Value("")
     game_state = reactive.Value(0)
-    #game_info_message.set("New game started")
 
     @reactive.Effect
     @reactive.event(input.new_game)
@@ -316,10 +295,6 @@ def server(input, output, session):
         debug_message.set(result)
         game_state.set(game_state() + 1)
 
-    #@render.text
-    #@reactive.event(game_state)
-    #def round_info():
-    #    return game().round_message
 
     @render.ui
     @reactive.event(game_state)
@@ -338,7 +313,6 @@ def server(input, output, session):
                         {"class": "card-row"},
                         [
                             ui.div(
-                                #ui.img(src=card.image_url(), style="width: 90px; height: 126px;"), 
                                 ui.img(
                                     {"src": card.image_url(), 
                                     "draggable": "true",
@@ -349,7 +323,6 @@ def server(input, output, session):
                                     "style": "width: 90px; height: 126px;"}
                                 ), 
                                 class_="card", 
-                                #onclick=f"Shiny.setInputValue('clicked_card', '{card.suit}:{card.value}')"
                             )
                             for card in row
                         ]
@@ -368,21 +341,6 @@ def server(input, output, session):
             debug_message.set(result)
             game_state.set(game_state() + 1)  # Trigger UI update
 
-    # @reactive.Effect
-    # @reactive.event(input.clicked_card)
-    # def _():
-    #     if input.clicked_card():
-    #         suit, value = input.clicked_card().split(":")
-    #         new_card = Card(suit, value)
-    #         clicked_card.set(new_card)
-            
-    #         game_instance = game()
-    #         result = game_instance.handle_click(new_card)
-    #         game.set(game_instance)
-            
-    #         debug_message.set(f"Card clicked: {suit} {value} (value_int: {new_card.value_int}). Result: {result}")
-    #         game_state.set(game_state() + 1)  # Trigger UI update
-
     @render.text
     def debug_output():
         return debug_message()
@@ -395,4 +353,3 @@ def server(input, output, session):
 app_dir = Path(__file__).parent
 
 app = App(app_ui, server, static_assets=app_dir / "www")
-#app = App(app_ui, server)
