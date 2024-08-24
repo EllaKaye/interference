@@ -5,8 +5,8 @@ from pathlib import Path
 
 # Card constants
 CARD_VALUES = ["Blank", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
-CARD_SUITS = ["Clubs", "Hearts", "Spades", "Diamonds"]
-SUIT_ICONS = {"Spades": "♠️", "Clubs": "♣️", "Hearts": "♥️", "Diamonds": "♦️"}
+CARD_SUITS = ["C", "H", "S", "D"]
+SUIT_ICONS = {"S": "♠️", "C": "♣️", "H": "♥️", "D": "♦️"} # for nicer print method
 VALUES_INT = {value: index for index, value in enumerate(CARD_VALUES)}
 
 class Card:
@@ -21,8 +21,8 @@ class Card:
     def image_url(self):
         if self.value == "Blank":
             return "blank.png"
-        value = "0" if self.value == "10" else self.value
-        return f"https://deckofcardsapi.com/static/img/{value}{self.suit[0]}.png"
+        value = "0" if self.value == "10" else self.value # for deckofcardsapi
+        return f"https://deckofcardsapi.com/static/img/{value}{self.suit}.png"
 
 class Row(list):
     def is_stuck(self):
@@ -54,10 +54,11 @@ class Row(list):
                 return False
         
         # Check if the last card is a Blank
+        # At this point, whole row is ordered if so
         return self[12].value == "Blank"
 
     def split_index(self):
-        if self[0].value_int != 2:
+        if self[0].value != "2":
             return 0
         for i in range(1, len(self)):
             if self[i].value_int != self[i - 1].value_int + 1:
@@ -90,7 +91,7 @@ class Rows(list):
         if card_row == -1 or card_index == -1:
             return None
         if card_index == 0:
-            return None  # If the card is at the start of a row, test_card should be None
+            return None  # If the card is at the start of a row, there's no card to test against
         else:
             return self[card_row][card_index - 1]
 
@@ -111,9 +112,15 @@ class Rows(list):
             return False
 
     def swap_cards(self, card1: Card, card2: Card):
+        # Only allow swaps on if valid
+        if not self.is_valid_move(card1, card2):
+            print(f"Invalid move: {card1.value}{card1.suit} with {card2.value}{card2.suit}")
+            return False
+
         row1, index1 = self.get_card_indices(card1)
         row2, index2 = self.get_card_indices(card2)
         self[row1][index1], self[row2][index2] = self[row2][index2], self[row1][index1]
+        return True
     
     def all_stuck(self):
         return all(row.is_stuck() for row in self)
@@ -152,8 +159,8 @@ class Game:
         self.deck = Deck()
         self.deck.shuffle()
         self.rows = self.deck.to_rows()
-        self.card_1: Optional[Card] = None
-        self.blank: Optional[Card] = None
+        #self.card_1: Optional[Card] = None
+        #self.blank: Optional[Card] = None
 
         # Game state
         self.round = 1
@@ -162,41 +169,33 @@ class Game:
         self.game_info_message = f"Round {self.round} of 3"
         self.won = None
 
-    def handle_click(self, clicked_card: Card) -> str:
-        if clicked_card.value != "Blank" and not self.card_1 and not self.blank:
-            self.card_1 = clicked_card
-            return "Selected first card"
+    def handle_swap(self, card1_id: str, card2_id: str) -> str:
+        # Don't allow swaps if round is over (no valid swaps anyway)
+        if self.round_over:
+            return f"Can't move card when the round/game is over"
+
+        card1_value, card1_suit = card1_id.split(":")
+        card2_value, card2_suit = card2_id.split(":")
         
-        elif clicked_card.value != "Blank" and self.card_1 and not self.blank:
-            self.card_1 = clicked_card
-            return "Changed selection"
+        card1 = Card(card1_suit, card1_value)
+        card2 = Card(card2_suit, card2_value)
+        
+        if self.rows.swap_cards(card1, card2):
+            # after swap, check new game state
+            self.round_over = self.rows.all_stuck()
+            if self.round_over:
+                self.won = self.rows.all_ordered()
+                if self.won:
+                    self.game_info_message = "You won!"
+                elif self.round == 3 and not self.won:
+                    self.game_info_message = "Game over. Click 'New Game' to try again."
+                else:
+                    self.game_info_message = "Round over. Click 'New Round' to continue."
 
-        elif clicked_card.value == "Blank" and self.card_1 and not self.blank:
-            self.blank = clicked_card
+            return f"Swapped {card1} with {card2}"
+        else:
+            return f"Invalid move: Cannot swap {card1} with {card2}"
 
-            if self.rows.is_valid_move(self.card_1, self.blank):
-                self.rows.swap_cards(self.card_1, self.blank)
-                self.card_1 = self.blank = None
-
-                # check if round is stuck
-                self.round_over = self.rows.all_stuck()
-                if self.round_over:
-                    # check if game is won or lost
-                    self.won = self.rows.all_ordered()
-                    if self.won:
-                        self.game_info_message = "You won!"
-                    elif self.round == 3 and not self.won:
-                        self.game_info_message = "Game over. Click 'New Game' to try again."
-                    else:
-                        self.game_info_message = "Round over. Click 'New Round' to continue."
-
-
-                return "Valid move, cards swapped"
-            else:
-                self.card_1 = self.blank = None
-                return "Invalid move"
-
-        return "No action"
 
     def new_round(self):
         if self.round == 3:
@@ -238,6 +237,7 @@ with open("about.md", "r") as file:
 with open("instructions.md", "r") as file:
     instructions = file.read()
 
+# Written with help from Shiny Assistant
 app_ui = ui.page_navbar(
     #ui.tags.link(href="www/styles.css", rel="stylesheet"),
     ui.nav_panel("Interference",
@@ -257,14 +257,13 @@ app_ui = ui.page_navbar(
                     #    style="margin-bottom: 10px;"
                     #),                    
                     ui.output_ui("cards"),
-                    ui.output_text("clicked_card_text"),
                     ui.output_text("debug_output"),
-                    ui.output_text("card_1_and_blank"),
                     offset=1
                 )
             ),
+            ui.tags.script(src="drag-drop.js"), 
             ui.tags.head(
-                ui.tags.link(rel="stylesheet", href="styles.css")  # Link to the custom CSS file
+                ui.tags.link(rel="stylesheet", href="styles.css")  
             ),
         )
     ),
@@ -287,7 +286,7 @@ app_ui = ui.page_navbar(
 )
 
 
-
+# Written with help from Shiny Assistant
 def server(input, output, session):
     game = reactive.Value(Game())
     clicked_card: reactive.Value[Optional[Card]] = reactive.Value(None)
@@ -317,10 +316,10 @@ def server(input, output, session):
         debug_message.set(result)
         game_state.set(game_state() + 1)
 
-    @render.text
-    @reactive.event(game_state)
-    def round_info():
-        return game().round_message
+    #@render.text
+    #@reactive.event(game_state)
+    #def round_info():
+    #    return game().round_message
 
     @render.ui
     @reactive.event(game_state)
@@ -339,9 +338,18 @@ def server(input, output, session):
                         {"class": "card-row"},
                         [
                             ui.div(
-                                ui.img(src=card.image_url(), style="width: 90px; height: 126px;"), 
+                                #ui.img(src=card.image_url(), style="width: 90px; height: 126px;"), 
+                                ui.img(
+                                    {"src": card.image_url(), 
+                                    "draggable": "true",
+                                    "ondragstart": "dragStart(event)",
+                                    "ondrop": "drop(event)",
+                                    "ondragover": "allowDrop(event)",
+                                    "id": f"{card.value}:{card.suit}",
+                                    "style": "width: 90px; height: 126px;"}
+                                ), 
                                 class_="card", 
-                                onclick=f"Shiny.setInputValue('clicked_card', '{card.suit}:{card.value}')"
+                                #onclick=f"Shiny.setInputValue('clicked_card', '{card.suit}:{card.value}')"
                             )
                             for card in row
                         ]
@@ -351,26 +359,29 @@ def server(input, output, session):
         )
 
     @reactive.Effect
-    @reactive.event(input.clicked_card)
+    @reactive.event(input.swap_cards)
     def _():
-        if input.clicked_card():
-            suit, value = input.clicked_card().split(":")
-            new_card = Card(suit, value)
-            clicked_card.set(new_card)
-            
+        if input.swap_cards():
             game_instance = game()
-            result = game_instance.handle_click(new_card)
+            result = game_instance.handle_swap(input.swap_cards()["source"], input.swap_cards()["target"])
             game.set(game_instance)
-            
-            debug_message.set(f"Card clicked: {suit} {value} (value_int: {new_card.value_int}). Result: {result}")
+            debug_message.set(result)
             game_state.set(game_state() + 1)  # Trigger UI update
 
-    @render.text
-    def clicked_card_text():
-        card = clicked_card()
-        if card:
-            return f"You clicked on {card} (value_int: {card.value_int})"
-        return "No card clicked yet"
+    # @reactive.Effect
+    # @reactive.event(input.clicked_card)
+    # def _():
+    #     if input.clicked_card():
+    #         suit, value = input.clicked_card().split(":")
+    #         new_card = Card(suit, value)
+    #         clicked_card.set(new_card)
+            
+    #         game_instance = game()
+    #         result = game_instance.handle_click(new_card)
+    #         game.set(game_instance)
+            
+    #         debug_message.set(f"Card clicked: {suit} {value} (value_int: {new_card.value_int}). Result: {result}")
+    #         game_state.set(game_state() + 1)  # Trigger UI update
 
     @render.text
     def debug_output():
@@ -380,14 +391,6 @@ def server(input, output, session):
     @reactive.event(game_state)
     def game_info_output():
         return game().game_info_message
-
-    @render.text
-    @reactive.event(game_state)
-    def card_1_and_blank():
-        game_instance = game()
-        card_1_str = str(game_instance.card_1) if game_instance.card_1 else "None"
-        blank_str = str(game_instance.blank) if game_instance.blank else "None"
-        return f"card_1: {card_1_str}, blank: {blank_str}"
 
 app_dir = Path(__file__).parent
 
