@@ -1,7 +1,6 @@
 from shiny import App, reactive, render, ui
 import random
 from typing import Optional, Tuple
-from pathlib import Path
 
 # Card constants
 CARD_VALUES = ["Blank", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
@@ -20,57 +19,12 @@ class Card:
 
     def image_url(self):
         if self.value == "Blank":
-            return "blank.png"
+            return "https://raw.githubusercontent.com/EllaKaye/interference-shiny/main/www/blank.png"
         value = "0" if self.value == "10" else self.value
         return f"https://deckofcardsapi.com/static/img/{value}{self.suit[0]}.png"
 
 class Row(list):
-    def is_stuck(self):
-        """A Row is stuck if all Blanks are after Kings"""
-
-        last_card_was_K = False
-
-        for card in self:
-            if card.value == "K":
-                last_card_was_K = True
-            elif card.value == "Blank":
-                if not last_card_was_K:
-                    return False # Found a Blank not after a King
-                # if we see a Blank after a K, or another Blank, do nothing
-            else:
-                last_card_was_K = False # reset flag for any other card
-
-        # We have looped over row and found all Blanks after Kings
-        return True
-
-    def is_ordered(self):
-        if len(self) != 13:
-            return False
-        
-        # Check if the first 12 cards are in order and of the same suit
-        suit = self[0].suit
-        for i in range(12):
-            if self[i].suit != suit or self[i].value_int != i + 2:
-                return False
-        
-        # Check if the last card is a Blank
-        return self[12].value == "Blank"
-
-    def split_index(self):
-        if self[0].value_int != 2:
-            return 0
-        for i in range(1, len(self)):
-            if self[i].value_int != self[i - 1].value_int + 1:
-                return i
-        return len(self) - 1 # 12 (an ordered row with 2-K will still have a blank or other card at the end)
-
-    def split(self, index):
-        return self[:index], self[index:]
-
-    def fill_row(self, deck):
-        while len(self) < 13:
-            self.append(deck.pop())
-        return self
+    pass
 
 class Rows(list):
     def get_card_indices(self, card: Card) -> Tuple[int, int]:
@@ -114,19 +68,6 @@ class Rows(list):
         row1, index1 = self.get_card_indices(card1)
         row2, index2 = self.get_card_indices(card2)
         self[row1][index1], self[row2][index2] = self[row2][index2], self[row1][index1]
-    
-    def all_stuck(self):
-        return all(row.is_stuck() for row in self)
-
-    def ordered_unordered(self):
-        indices = [row.split_index() for row in self]
-        split_rows = [row.split(i) for row, i in zip(self, indices)]
-        ordered = [item[0] for item in split_rows]
-        unordered = [element for item in split_rows for element in item[1]]
-        return ordered, unordered
-
-    def all_ordered(self):
-        return all(row.is_ordered() for row in self)
 
 class Deck:
     def __init__(self):
@@ -157,7 +98,7 @@ class Game:
 
         # Game state
         self.round = 1
-        self.round_over = self.rows.all_stuck()
+        #self.round_over = self.rows.all_stuck()
         #self.round_message = f"Round {self.round} of 3"
         self.game_info_message = f"Round {self.round} of 3"
         self.won = None
@@ -178,18 +119,6 @@ class Game:
                 self.rows.swap_cards(self.card_1, self.blank)
                 self.card_1 = self.blank = None
 
-                # check if round is stuck
-                self.round_over = self.rows.all_stuck()
-                if self.round_over:
-                    # check if game is won or lost
-                    self.won = self.rows.all_ordered()
-                    if self.won:
-                        self.game_info_message = "You won!"
-                    elif self.round == 3 and not self.won:
-                        self.game_info_message = "Game over. Click 'New Game' to try again."
-                    else:
-                        self.game_info_message = "Round over. Click 'New Round' to continue."
-
 
                 return "Valid move, cards swapped"
             else:
@@ -198,55 +127,13 @@ class Game:
 
         return "No action"
 
-    def new_round(self):
-        if self.round == 3:
-            self.game_info_message = "Out of rounds. Click 'New Game' to start again."
-            return "Out of rounds"
-
-        self.round_over = False
-        self.round += 1
-        self.game_info_message = f"Round {self.round} of 3"
-
-        ordered, unordered = self.rows.ordered_unordered()
-        self.rows = Rows([Row(row) for row in ordered])
-
-        # separate out blanks from the rest
-        blanks = [card for card in unordered if card.value == "Blank"]
-        value_cards = [card for card in unordered if card.value != "Blank"]
-
-        # create and shuffle a deck of the unordered cards
-        unordered_deck = Deck()
-        unordered_deck.cards = value_cards
-        unordered_deck.shuffle()
-
-        # deal the blanks
-        for row in self.rows:
-            row.append(blanks.pop())
-
-        # deal the rest of the cards
-        for row in self.rows:
-            row.fill_row(unordered_deck.cards)
-
-        self.card_1 = None
-        self.blank = None
-
-        return f"Starting Round {self.round}"
-
-with open("about.md", "r") as file:
-    about = file.read()
-
-with open("instructions.md", "r") as file:
-    instructions = file.read()
-
 app_ui = ui.page_navbar(
-    #ui.tags.link(href="www/styles.css", rel="stylesheet"),
     ui.nav_panel("Interference",
         ui.div(
             ui.row(
                 ui.column(10,
                     ui.div(
                         ui.input_action_button("new_game", "New Game"),
-                        ui.input_action_button("new_round", "New Round"),
                     ),
                     ui.div(
                         ui.output_text("game_info_output"),
@@ -262,25 +149,6 @@ app_ui = ui.page_navbar(
                     ui.output_text("card_1_and_blank"),
                     offset=1
                 )
-            ),
-            ui.tags.head(
-                ui.tags.link(rel="stylesheet", href="styles.css")  # Link to the custom CSS file
-            ),
-        )
-    ),
-    ui.nav_panel("Instructions", 
-        ui.row(
-            ui.column(10,
-                ui.markdown(instructions),
-                offset=1
-            )
-        )
-    ),
-    ui.nav_panel("About",
-        ui.row(
-            ui.column(10,
-                ui.markdown(about),
-                offset=1
             )
         )
     )
@@ -306,21 +174,6 @@ def server(input, output, session):
         game_info_message.set("New game started")
         debug_message.set("New game started")
         game_state.set(game_state() + 1)
-
-    @reactive.Effect
-    @reactive.event(input.new_round)
-    def _():
-        game_instance = game()
-        result = game_instance.new_round()
-        game.set(game_instance)
-        game_info_message.set("New round started")
-        debug_message.set(result)
-        game_state.set(game_state() + 1)
-
-    @render.text
-    @reactive.event(game_state)
-    def round_info():
-        return game().round_message
 
     @render.ui
     @reactive.event(game_state)
@@ -389,7 +242,4 @@ def server(input, output, session):
         blank_str = str(game_instance.blank) if game_instance.blank else "None"
         return f"card_1: {card_1_str}, blank: {blank_str}"
 
-app_dir = Path(__file__).parent
-
-app = App(app_ui, server, static_assets=app_dir / "www")
-#app = App(app_ui, server)
+app = App(app_ui, server)
