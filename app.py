@@ -4,22 +4,7 @@ from typing import Optional, Tuple
 from pathlib import Path
 
 # Card constants
-CARD_VALUES = [
-    "Blank",
-    "A",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "J",
-    "Q",
-    "K",
-]
+CARD_VALUES = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "Blank"]
 CARD_SUITS = ["S", "H", "D", "C"]
 SUIT_ICONS = {"S": "♠️", "H": "♥️", "D": "♦️", "C": "♣️"}  # for nicer print method
 VALUES_INT = {value: index for index, value in enumerate(CARD_VALUES)}
@@ -66,8 +51,9 @@ class Row(list):
 
         # Check if the first 12 cards are in order and of the same suit
         suit = self[0].suit
+        # Check the first 12 cards, for suit and value
         for i in range(12):
-            if self[i].suit != suit or self[i].value_int != i + 2:
+            if self[i].suit != suit or self[i].value_int != i:
                 return False
 
         # Check if the last card is a Blank
@@ -113,7 +99,7 @@ class Rows(list):
     def is_valid_move(self, card1: Card, card2: Card) -> bool:
         test_card = self.get_test_card(card2)
 
-        if not test_card and card1.value_int == 2:
+        if not test_card and card1.value == "2":
             return True
         elif not test_card:
             return False
@@ -157,7 +143,6 @@ class Deck:
             Card(suit, value)
             for suit in CARD_SUITS
             for value in CARD_VALUES
-            if value != "A"
         ]
 
     def shuffle(self):
