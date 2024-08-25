@@ -8,7 +8,9 @@ Arrange each row in ascending order, from 2 to King (followed by a playing space
 - Drag and drop cards into playing spaces to move them, according to the following rules:
 
     - If there's a playing space at the beginning of the row, any 2 can go there.
+
     - Otherwise, you can only put a card in a space if it's next card in sequence and of the same suit as the card on the left of the space, e.g. only the 3♠️ can go after the 2♠️, only the J♥️ can go after 10♥️.
+
     - Nothing can go after an King, or after a playing space.
 
 - The layout is stuck if there are no valid moves left, i.e. if all playing spaces are after Kings or other playing spaces.
