@@ -1,26 +1,27 @@
 ## Aim of the game
-Arrange each row in ascending order, from 2 to King (followed by a playing space), one row per suit.
+
+Arrange each row in ascending order, from 2 to King (followed by a space), one row per suit.
 
 ## How to Play
 
-- At the start, the deck is shuffled and dealt into four rows of 13 cards, then the Aces are removed to create playing spaces.
+- At the start, the deck is shuffled and dealt into four rows of thirteen cards, then the Aces are removed to create spaces.
 
-- Drag and drop cards into playing spaces to move them, according to the following rules:
+- Drag and drop cards into spaces to move them, according to the following rules:
 
-    - If there's a playing space at the beginning of the row, any 2 can go there.
+    - If there's a space at the beginning of the row, any 2 can go there.
 
-    - Otherwise, you can only put a card in a space if it's the next card in sequence and of the same suit as the card on the left of the space, e.g. only the 3♠️ can go after the 2♠️, only the J♥️ can go after 10♥️.
+    - Otherwise, you can only move a card into a space if it's the same suit and one rank higher than the card to the left of the space, e.g. only the 3♠️ can be placed after the 2♠️, only the J♥️ can be placed after 10♥️.
 
-    - Nothing can go after an King, or after a playing space.
+    - Nothing can go after a King, or after a space.
 
-- The layout is stuck if there are no valid moves left, i.e. if all playing spaces are after Kings or other playing spaces.
+- The tableau is stuck if there are no valid moves left, i.e. if all spaces are after Kings or other spaces.
 
-- When the layout is stuck, to start a new round, click the 'New Round' button. This will collect and shuffle all the cards that are not yet in order, then deal them out again to fill the rows, leaving one playing space in each row, after the ordered cards.
+- When the tableau is stuck, to start a new round, click the 'New Round' button. This will collect and shuffle all the cards that are not yet arranged in ascending order at the start of a row, then deal them out again to fill the rows, leaving one space in each row, after the ordered cards.
 
 - A game consists of up to three rounds.
 
-- Because there are up to four valid moves at any time, this is a version of solitaire that requires some skill (as well as the luck of the deal). You have a better chance of success if you think strategically. What card would you like to be able to move? What other cards need to move to make that possible?
+- Because there are up to four valid moves at any time, and the game is open (i.e. you see all the cards), this is a version of patience/solitaire that requires skill. You have a better chance of success if you think strategically. What are the consequences of each valid move? What card would you like to be able to move, and what other cards need to move to make that possible?
 
-- The game ends when all rows are correctly ordered or when the third round is stuck.
+- The game ends when all rows are arranged in ascending order by suit, or when the third round is stuck.
 
 - Start a new game by clicking the 'New Game' button.
