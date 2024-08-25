@@ -14,13 +14,13 @@ Arrange each row in ascending order, from 2 to King (followed by a space), one r
 
     - Nothing can go after a King, or after a space.
 
-- The tableau is stuck if there are no valid moves left, i.e. if all spaces are after Kings or other spaces.
+- The tableau is blocked if there are no valid moves left, i.e. if all spaces are after Kings or other spaces.
 
-- When the tableau is stuck, to start a new round, click the 'New Round' button. This will collect and shuffle all the cards that are not yet arranged in ascending order at the start of a row, then deal them out again to fill the rows, leaving one space in each row, after the ordered cards.
+- When the tableau is blocked, to start a new round, click the 'New Round' button. This will collect and shuffle all the cards that are not yet arranged by suit in ascending order at the start of a row, then deal them out again to fill the rows, leaving one space in each row, after the ordered cards (or a space at the start of the row, if it doesn't yet start with a 2).
 
 - A game consists of up to three rounds.
 
-- Because there are up to four valid moves at any time, and the game is open (i.e. you see all the cards), this is a version of patience/solitaire that requires skill. You have a better chance of success if you think strategically. What are the consequences of each valid move? What card would you like to be able to move, and what other cards need to move to make that possible?
+- Because there are up to four valid moves at any time, this version of patience/solitaire requires skill. You have a better chance of success if you think strategically. What's the sequence of consequences of each valid move? What card would you like to be able to move, and what other cards need to move to make that possible?
 
 - The game ends when all rows are arranged in ascending order by suit, or when the third round is stuck.
 
