@@ -261,9 +261,9 @@ app_ui = ui.page_navbar(
         "Instructions", 
         ui.row(
             ui.column(
-                10, 
+                8, 
                 ui.markdown(instructions), 
-                offset=1
+                offset=2
             )
         )
     ),
@@ -271,9 +271,9 @@ app_ui = ui.page_navbar(
         "About", 
         ui.row(
             ui.column(
-                10, 
+                8, 
                 ui.markdown(about), 
-                offset=1
+                offset=2
             )
         )
     )
