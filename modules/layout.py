@@ -60,4 +60,5 @@ def about_panel():
 app_ui = ui.page_navbar(
     interference_panel(),
     instructions_panel(),
-    about_panel())
+    about_panel()
+)
