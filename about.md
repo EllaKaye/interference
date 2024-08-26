@@ -3,14 +3,14 @@
 This is a patience (or solitaire) game, 
 where a deck of cards is shuffled and dealt into four rows of thirteen cards.
 The Aces are then removed, leaving spaces. 
-The aim is to sort each row into ascending order, from 2 to King (followed by a space), one row per suit, 
+The aim is to sort each row into ascending order, from 2 to King, ending with a space, one row per suit, 
 by moving cards into spaces, one at a time, according to the rules. 
 See the [Instructions](#Instructions) page for full details on how to play.
 
 I learnt this patience from my grandparents when I was young. 
 In my family, it's called "interference", 
 because whenever anybody sits down to play, 
-someone else would come and stand over their shoulder and interfere by suggesting what the next move should be.
+someone else comes and stands over their shoulder and interfere by suggesting what the next move should be.
 
 I couldn't find any information about a patience called "interference"
 and finally found out (as I was writing this page) that it is actually called [Gaps](https://en.wikipedia.org/wiki/Gaps). 
