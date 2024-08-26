@@ -6,9 +6,8 @@ with open("about.md", "r") as file:
 with open("instructions.md", "r") as file:
     instructions = file.read()
 
-
-app_ui = ui.page_navbar(
-    ui.nav_panel(
+def interference_panel():
+    return ui.nav_panel(
         "Interference",
         ui.div(
             ui.row(
@@ -32,8 +31,10 @@ app_ui = ui.page_navbar(
         ui.tags.link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Figtree"),
         ui.tags.script(src="drag-drop.js"),
         ui.tags.script(src="md-navigation.js")
-    ),
-    ui.nav_panel(
+    )
+
+def instructions_panel():
+    return ui.nav_panel(
         "Instructions", 
         ui.row(
             ui.column(
@@ -42,8 +43,10 @@ app_ui = ui.page_navbar(
                 offset=2
             )
         )
-    ),
-    ui.nav_panel(
+    )
+
+def about_panel():
+    return ui.nav_panel(
         "About", 
         ui.row(
             ui.column(
@@ -53,4 +56,8 @@ app_ui = ui.page_navbar(
             )
         )
     )
-)
+
+app_ui = ui.page_navbar(
+    interference_panel(),
+    instructions_panel(),
+    about_panel())
