@@ -287,7 +287,7 @@ def server(input, output, session):
     game_info_message = reactive.Value("")
     game_state = reactive.Value(0)
 
-    @reactive.Effect
+    @reactive.effect
     @reactive.event(input.new_game)
     def _():
         game_instance = game()
@@ -298,7 +298,7 @@ def server(input, output, session):
         debug_message.set("New game started")
         game_state.set(game_state() + 1)
 
-    @reactive.Effect
+    @reactive.effect
     @reactive.event(input.new_round)
     def _():
         game_instance = game()
@@ -348,7 +348,7 @@ def server(input, output, session):
             ),
         )
 
-    @reactive.Effect
+    @reactive.effect
     @reactive.event(input.swap_cards)
     def _():
         if input.swap_cards():
