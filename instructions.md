@@ -1,8 +1,6 @@
-## Aim of the game
-
-Arrange each row in ascending order, from 2 to King (followed by a space), one row per suit.
-
 ## How to Play
+
+- The aim is to arrange each row in ascending order, from 2 to King (followed by a space), one row per suit.
 
 - At the start, the deck is shuffled and dealt into four rows of thirteen cards, then the Aces are removed to create spaces.
 
