@@ -248,17 +248,34 @@ app_ui = ui.page_navbar(
                     ),
                     ui.output_ui("cards"),
                     # ui.output_text("debug_output"),
-                    offset=1,
+                    offset=1
                 )
             ),
-            ui.tags.script(src="drag-drop.js"),
-            ui.tags.head(ui.tags.link(rel="stylesheet", href="styles.css")),
         ),
+        ui.tags.link(rel="stylesheet", href="styles.css"),
+        ui.tags.script(src="drag-drop.js"),
+        ui.tags.script(src="md-navigation.js")
     ),
     ui.nav_panel(
-        "Instructions", ui.row(ui.column(10, ui.markdown(instructions), offset=1))
+        "Instructions", 
+        ui.row(
+            ui.column(
+                10, 
+                ui.markdown(instructions), 
+                offset=1
+            )
+        )
     ),
-    ui.nav_panel("About", ui.row(ui.column(10, ui.markdown(about), offset=1))),
+    ui.nav_panel(
+        "About", 
+        ui.row(
+            ui.column(
+                10, 
+                ui.markdown(about), 
+                offset=1
+            )
+        )
+    )
 )
 
 

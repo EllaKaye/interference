@@ -1,3 +1,5 @@
+// enables draging and droping of cards
+
 // written by Shiny Assistant
 
 function dragStart(event) {

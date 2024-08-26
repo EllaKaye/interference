@@ -1,5 +1,5 @@
 body {
-    background-color: #156645; /* green background */
+    background-color: #156645; 
     color: white;
 }
 .card img {
@@ -31,3 +31,8 @@ border: none;
     text-transform: uppercase;
     transition: color 0.3s;
 }
+
+a {
+    color: white;
+}
+
