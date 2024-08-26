@@ -1,6 +1,6 @@
 from shiny import App, reactive, render, ui
 #import random
-from typing import Optional, Tuple
+from typing import Optional
 from modules.classes import Card, Game
 from modules.layout import app_ui
 from pathlib import Path
