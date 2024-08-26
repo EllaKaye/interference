@@ -36,6 +36,6 @@ Developed by: [Ella Kaye](https://ellakaye.co.uk)
 
 GitHub: [EllaKaye/interference](https://github.com/EllaKaye/interference)
 
-Version: 3.0.0 (Augist 2024)
+Version: 3.0.0 (August 2024)
 
 License: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.en)
