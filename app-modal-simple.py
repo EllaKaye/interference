@@ -4,6 +4,9 @@ class Game:
     def __init__(self):
         self.state = reactive.Value("playing")
         self.score = reactive.Value(0)
+        self.letter = "b"
+        self.title = "Title a" if self.letter == "a" else "Different title"
+
 
     def update_score(self, points):
         self.score.set(self.score() + points)
@@ -32,7 +35,7 @@ def server(input, output, session):
         if game.state() == "won":
             m = ui.modal(  
                 "Click 'New Game' to start again",  
-                title = "You won!",
+                title = f"{game.title}",
                 footer = ui.input_action_button("new_game_button_modal", "New Game"),
                 size = "s"
             )
