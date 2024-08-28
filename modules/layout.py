@@ -1,5 +1,6 @@
 from shiny import ui
 
+
 with open("about.md", "r") as file:
     about = file.read()
 
@@ -26,11 +27,7 @@ def interference_panel():
                     offset=1
                 )
             ),
-        ),
-        ui.tags.link(rel="stylesheet", href="styles.css"),
-        ui.tags.link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Figtree"),
-        ui.tags.script(src="drag-drop.js"),
-        ui.tags.script(src="md-navigation.js")
+        )
     )
 
 def instructions_panel():
@@ -60,5 +57,11 @@ def about_panel():
 app_ui = ui.page_navbar(
     interference_panel(),
     instructions_panel(),
-    about_panel()
+    about_panel(),
+    header = ui.tags.head(
+        ui.tags.link(rel="stylesheet", href="styles.css"),
+        ui.tags.link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Figtree"),
+        ui.tags.script(src="drag-drop.js"),
+        ui.tags.script(src="md-navigation.js")
+    ),
 )
