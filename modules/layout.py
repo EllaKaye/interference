@@ -62,6 +62,11 @@ app_ui = ui.page_navbar(
         ui.tags.link(rel="stylesheet", href="styles.css"),
         ui.tags.link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Figtree"),
         ui.tags.script(src="drag-drop.js"),
-        ui.tags.script(src="md-navigation.js")
+        ui.tags.script(src="md-navigation.js"),
+        ui.tags.style("""
+        .modal-content {
+            background-color: #156645 !important;
+        }
+    """)
     ),
 )

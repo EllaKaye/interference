@@ -1,21 +1,22 @@
 from shiny import App, reactive, render, ui
-#import random
 from typing import Optional
 from modules.classes import Card, Game
 from modules.layout import app_ui
+from helpers import game_over_modal
 from pathlib import Path
 
 # Written with help from Shiny Assistant
 def server(input, output, session):
-    game = reactive.Value(Game())
-    clicked_card: reactive.Value[Optional[Card]] = reactive.Value(None)
-    debug_message = reactive.Value("")
-    game_info_message = reactive.Value("")
-    game_state = reactive.Value(0)
+    game = reactive.value(Game())
+    clicked_card: reactive.value[Optional[Card]] = reactive.value(None)
+    debug_message = reactive.value("")
+    game_info_message = reactive.value("")
+    game_state = reactive.value(0)
 
     @reactive.effect
-    @reactive.event(input.new_game)
+    @reactive.event(input.new_game, input.new_game_modal)
     def _():
+        ui.modal_remove()
         game_instance = game()
         game_instance.new_game()
         game.set(game_instance)
@@ -27,12 +28,22 @@ def server(input, output, session):
     @reactive.effect
     @reactive.event(input.new_round)
     def _():
+        ui.modal_remove()
         game_instance = game()
         result = game_instance.new_round()
         game.set(game_instance)
         game_info_message.set("New round started")
         debug_message.set(result)
         game_state.set(game_state() + 1)
+
+    @reactive.effect
+    #@reactive.event(game_state)
+    def _():
+        game_over_title = game().game_over_title()
+        if game_over_title:
+            ui.modal_show(
+                game_over_modal(game_over_title)
+            )
 
     @render.ui
     @reactive.event(game_state)

@@ -1,3 +1,4 @@
+from shiny import reactive
 import random
 from typing import Optional, Tuple
 
@@ -159,7 +160,8 @@ class Game:
         self.round = 1
         self.round_over = self.rows.all_stuck()
         self.game_info_message = f"Round {self.round} of 3"
-        self.won = None
+        self.success = None
+        self.game_over_title = reactive.value("")
 
     def handle_swap(self, card1_id: str, card2_id: str) -> str:
         # Don't allow swaps if round is over (no valid swaps anyway)
@@ -176,12 +178,14 @@ class Game:
             # after swap, check new game state
             self.round_over = self.rows.all_stuck()
             if self.round_over:
-                self.won = self.rows.all_ordered()
-                if self.won:
+                self.success = self.rows.all_ordered()
+                if self.success:
                     self.game_info_message = "You won!"
-                elif self.round == 3 and not self.won:
+                    self.game_over_title.set("Success!")
+                elif self.round == 3 and not self.success:
                     self.game_info_message = "Game over. Click 'New Game' to try again."
-                else:
+                    self.game_over_title.set("Game over")
+                else:               
                     self.game_info_message = (
                         "Round over. Click 'New Round' to continue."
                     )
