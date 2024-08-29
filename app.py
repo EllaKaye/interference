@@ -41,7 +41,6 @@ def server(input, output, session):
     @reactive.effect
     @reactive.event(input.new_round)
     def _():
-        print(f"Button clicked")
         ui.modal_remove()
         game_instance = game()
         result = game_instance.new_round()
@@ -53,7 +52,6 @@ def server(input, output, session):
     @reactive.effect
     @reactive.event(input.new_round_modal)
     def _():
-        print(f"Modal button clicked")
         ui.modal_remove()
         game_instance = game()
         result = game_instance.new_round()
