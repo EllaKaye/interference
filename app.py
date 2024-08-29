@@ -2,7 +2,7 @@ from shiny import App, reactive, render, ui
 from typing import Optional
 from modules.classes import Card, Game
 from modules.layout import app_ui
-from helpers import game_over_modal
+from helpers import game_over_modal, round_over_modal
 from pathlib import Path
 
 # Written with help from Shiny Assistant
@@ -13,8 +13,21 @@ def server(input, output, session):
     game_info_message = reactive.value("")
     game_state = reactive.value(0)
 
+
     @reactive.effect
-    @reactive.event(input.new_game, input.new_game_modal)
+    @reactive.event(input.new_game)
+    def _():
+        ui.modal_remove()
+        game_instance = game()
+        game_instance.new_game()
+        game.set(game_instance)
+        clicked_card.set(None)
+        game_info_message.set("New game started")
+        debug_message.set("New game started")
+        game_state.set(game_state() + 1)
+
+    @reactive.effect
+    @reactive.event(input.new_game_modal)
     def _():
         ui.modal_remove()
         game_instance = game()
@@ -28,6 +41,7 @@ def server(input, output, session):
     @reactive.effect
     @reactive.event(input.new_round)
     def _():
+        print(f"Button clicked")
         ui.modal_remove()
         game_instance = game()
         result = game_instance.new_round()
@@ -37,12 +51,31 @@ def server(input, output, session):
         game_state.set(game_state() + 1)
 
     @reactive.effect
-    #@reactive.event(game_state)
+    @reactive.event(input.new_round_modal)
+    def _():
+        print(f"Modal button clicked")
+        ui.modal_remove()
+        game_instance = game()
+        result = game_instance.new_round()
+        game.set(game_instance)
+        game_info_message.set("New round started")
+        debug_message.set(result)
+        game_state.set(game_state() + 1)
+    
+    @reactive.effect
     def _():
         game_over_title = game().game_over_title()
         if game_over_title:
             ui.modal_show(
                 game_over_modal(game_over_title)
+            )
+
+    @reactive.effect
+    def _():
+        round_over_title = game().round_over_title()
+        if round_over_title:
+            ui.modal_show(
+                round_over_modal(round_over_title)
             )
 
     @render.ui

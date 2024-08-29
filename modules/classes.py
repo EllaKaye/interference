@@ -162,6 +162,7 @@ class Game:
         self.game_info_message = f"Round {self.round} of 3"
         self.success = None
         self.game_over_title = reactive.value("")
+        self.round_over_title = reactive.value("")
 
     def handle_swap(self, card1_id: str, card2_id: str) -> str:
         # Don't allow swaps if round is over (no valid swaps anyway)
@@ -177,18 +178,18 @@ class Game:
         if self.rows.swap_cards(card1, card2):
             # after swap, check new game state
             self.round_over = self.rows.all_stuck()
+            #self.round_over.set(self.rows.all_stuck())
             if self.round_over:
                 self.success = self.rows.all_ordered()
                 if self.success:
-                    self.game_info_message = "You won!"
+                    print("You won!")
                     self.game_over_title.set("Success!")
                 elif self.round == 3 and not self.success:
-                    self.game_info_message = "Game over. Click 'New Game' to try again."
+                    print("Game over. Click 'New Game' to try again.")
                     self.game_over_title.set("Game over")
                 else:               
-                    self.game_info_message = (
-                        "Round over. Click 'New Round' to continue."
-                    )
+                    print("Round over. Click 'New Round' to continue.")
+                    self.round_over_title.set("Round over")
 
             return f"Swapped {card1} with {card2}"
         else:
@@ -196,10 +197,11 @@ class Game:
 
     def new_round(self):
         if self.round == 3:
-            self.game_info_message = "Out of rounds. Click 'New Game' to start again."
+            self.game_over_title.set("Out of rounds")
             return "Out of rounds"
 
         self.round_over = False
+        self.round_over_title.set("")
         self.round += 1
         self.game_info_message = f"Round {self.round} of 3"
 
