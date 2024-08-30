@@ -1,6 +1,5 @@
 from shiny import ui
 
-
 with open("about.md", "r") as file:
     about = file.read()
 
@@ -26,7 +25,7 @@ def interference_panel():
                     # ui.output_text("debug_output"),
                     offset=1
                 )
-            ),
+            )
         )
     )
 
@@ -68,5 +67,5 @@ app_ui = ui.page_navbar(
             background-color: #156645 !important;
         }
     """)
-    ),
+    )
 )
