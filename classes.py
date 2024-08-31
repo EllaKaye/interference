@@ -18,11 +18,11 @@ class Card:
     def __str__(self):
         return f"{self.value}{SUIT_ICONS[self.suit]}"
 
-    def image_url(self):
+    def image_path(self):
         if self.value == "Blank":
-            return "images/blank.png"
-        value = "0" if self.value == "10" else self.value  # for deckofcardsapi
-        return f"https://deckofcardsapi.com/static/img/{value}{self.suit}.png"
+            return "img/blank.png"
+        #value = "0" if self.value == "10" else self.value  # for deckofcardsapi
+        return f"img/{self.value}{self.suit}.png"
 
 
 class Row(list):
