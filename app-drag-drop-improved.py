@@ -7,7 +7,8 @@ class Card:
 
     def image_url(self):
         if self.value == "Blank":
-            return "https://raw.githubusercontent.com/EllaKaye/interference/main/www/blank.png"
+            #return "https://raw.githubusercontent.com/EllaKaye/interference/main/www/blank.png"
+            return "images/blank.png"
         value = "0" if self.value == "10" else self.value
         return f"https://deckofcardsapi.com/static/img/{value}{self.suit[0]}.png"
 
@@ -99,7 +100,8 @@ def server(input, output, session):
                 {"class": "d-flex justify-content-between mb-2"},
                 [ui.div(
                     ui.img(
-                        {"src": Card("Blank", "").image_url() if f"{card.value}:{card.suit}" == currently_dragged else card.image_url(), 
+                        #{"src": Card("Blank", "").image_url() if f"{card.value}:{card.suit}" == currently_dragged else card.image_url(), 
+                        {"src": "images/blank.png" if f"{card.value}:{card.suit}" == currently_dragged else card.image_url(), 
                          "draggable": "true",
                          "ondragstart": "dragStart(event)",
                          "ondragend": "dragEnd(event)",

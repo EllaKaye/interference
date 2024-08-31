@@ -20,7 +20,7 @@ class Card:
 
     def image_url(self):
         if self.value == "Blank":
-            return "blank.png"
+            return "images/blank.png"
         value = "0" if self.value == "10" else self.value  # for deckofcardsapi
         return f"https://deckofcardsapi.com/static/img/{value}{self.suit}.png"
 

@@ -5,7 +5,7 @@ from classes import Card, Game
 
 def server(input, output, session):
     game = reactive.value(Game())
-    clicked_card: reactive.value[Optional[Card]] = reactive.value(None)
+    dragged_card: reactive.value[Optional[Card]] = reactive.value(None)
     debug_message = reactive.value("")
     game_info_message = reactive.value("")
     game_state = reactive.value(0)
@@ -17,7 +17,7 @@ def server(input, output, session):
         game_instance = game()
         game_instance.new_game()
         game.set(game_instance)
-        clicked_card.set(None)
+        dragged_card.set(None)
         game_info_message.set("New game started")
         debug_message.set("New game started")
         game_state.set(game_state() + 1)
@@ -29,7 +29,7 @@ def server(input, output, session):
         game_instance = game()
         game_instance.new_game()
         game.set(game_instance)
-        clicked_card.set(None)
+        dragged_card.set(None)
         game_info_message.set("New game started")
         debug_message.set("New game started")
         game_state.set(game_state() + 1)
@@ -73,9 +73,10 @@ def server(input, output, session):
             )
 
     @render.ui
-    @reactive.event(game_state)
+    @reactive.event(game_state, dragged_card)
     def cards():
         rows = game().rows
+        currently_dragged = dragged_card.get()
         return ui.div(
             ui.tags.style(
                 """
@@ -93,9 +94,10 @@ def server(input, output, session):
                             ui.div(
                                 ui.img(
                                     {
-                                        "src": card.image_url(),
+                                        "src": "images/blank.png" if f"{card.value}:{card.suit}" == currently_dragged else card.image_url(),
                                         "draggable": "true",
                                         "ondragstart": "dragStart(event)",
+                                        "ondragend": "dragEnd(event)",
                                         "ondrop": "drop(event)",
                                         "ondragover": "allowDrop(event)",
                                         "id": f"{card.value}:{card.suit}",
@@ -113,16 +115,22 @@ def server(input, output, session):
         )
 
     @reactive.effect
+    @reactive.event(input.dragged_card)
+    def update_dragged_card():
+        dragged_card.set(input.dragged_card())
+        game_state.set(game_state() + 1)
+
+    @reactive.effect
     @reactive.event(input.swap_cards)
     def _():
         if input.swap_cards():
             game_instance = game()
-            result = game_instance.handle_swap(
-                input.swap_cards()["source"], input.swap_cards()["target"]
-            )
+            card1_id, card2_id = input.swap_cards().split(',')
+            result = game_instance.handle_swap(card1_id, card2_id)
             game.set(game_instance)
             debug_message.set(result)
             game_state.set(game_state() + 1)  # Trigger UI update
+            dragged_card.set(None)
 
     @render.text
     def debug_output():
