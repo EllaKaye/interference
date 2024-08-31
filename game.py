@@ -21,7 +21,6 @@ class Card:
     def image_path(self):
         if self.value == "Blank":
             return "img/blank.png"
-        #value = "0" if self.value == "10" else self.value  # for deckofcardsapi
         return f"img/{self.value}{self.suit}.png"
 
 

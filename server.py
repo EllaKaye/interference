@@ -1,7 +1,7 @@
 from shiny import reactive, ui, render
 from helpers import game_over_modal, round_over_modal
 from typing import Optional
-from classes import Card, Game
+from game import Card, Game
 
 def server(input, output, session):
     game = reactive.value(Game())
