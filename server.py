@@ -84,6 +84,7 @@ def server(input, output, session):
                 .card-container { display: flex; flex-direction: column; }
                 .card-row { display: flex; justify-content: flex-start; margin-bottom: 20px; }
                 .card { margin-right: 4px; cursor: pointer; width: 90px; height: 126px; }
+                .card-playable:hover { transform: translateY(-10px); z-index: 10; }
             """
             ),
             ui.div(
@@ -105,7 +106,7 @@ def server(input, output, session):
                                         "style": "width: 90px; height: 126px;",
                                     }
                                 ),
-                                class_="card",
+                                class_=f"card {'card-playable' if card.value != 'Blank' else ''}"
                             )
                             for card in row
                         ]
