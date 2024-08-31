@@ -95,7 +95,7 @@ def server(input, output, session):
                             ui.div(
                                 ui.img(
                                     {
-                                        "src": "images/blank.png" if f"{card.value}:{card.suit}" == currently_dragged else card.image_url(),
+                                        "src": "img/blank.png" if f"{card.value}:{card.suit}" == currently_dragged else card.image_path(),
                                         "draggable": "true",
                                         "ondragstart": "dragStart(event)",
                                         "ondragend": "dragEnd(event)",
