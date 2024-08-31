@@ -77,6 +77,7 @@ def server(input, output, session):
     def cards():
         rows = game().rows
         currently_dragged = dragged_card.get()
+        #print(f"Rendering cards. Currently dragged: {currently_dragged}")  # Debug print
         return ui.div(
             ui.tags.style(
                 """
@@ -117,8 +118,19 @@ def server(input, output, session):
     @reactive.effect
     @reactive.event(input.dragged_card)
     def update_dragged_card():
+        #print(f"Dragged card updated: {input.dragged_card()}")  # Debug print
         dragged_card.set(input.dragged_card())
+        #print(f"Dragged card updated and set: {input.dragged_card()}")  # Debug print
+        #if input.dragged_card() is None:
+        #game_state.set(game_state() + 1) 
         game_state.set(game_state() + 1)
+
+    @reactive.effect
+    @reactive.event(input.drag_ended)
+    def handle_drag_end():
+        #print("Drag ended event received")  # Debug print
+        dragged_card.set(None)
+        game_state.set(game_state() + 1)  # Trigger UI update
 
     @reactive.effect
     @reactive.event(input.swap_cards)
@@ -129,8 +141,9 @@ def server(input, output, session):
             result = game_instance.handle_swap(card1_id, card2_id)
             game.set(game_instance)
             debug_message.set(result)
-            game_state.set(game_state() + 1)  # Trigger UI update
-            dragged_card.set(None)
+        dragged_card.set(None)
+        game_state.set(game_state() + 1)  # Trigger UI update
+
 
     @render.text
     def debug_output():

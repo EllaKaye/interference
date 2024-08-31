@@ -11,12 +11,42 @@ function dragStart(event) {
 function dragEnd(event) {
     console.log("Drag ended:", event.target.id);  // Debug log
     Shiny.setInputValue('dragged_card', null, {priority: 'event'});
+    Shiny.setInputValue('drag_ended', Math.random(), {priority: 'event'});
 }
 
 function allowDrop(event) {
     event.preventDefault();
 }
 
+function drop(event) {
+    event.preventDefault();
+    var sourceId = event.dataTransfer.getData("text");
+    var targetElement = event.target.closest('img');
+    if (targetElement) {
+        var targetId = targetElement.id;
+        console.log("Drop - Source:", sourceId, "Target:", targetId);  // Debug log
+        if (sourceId !== targetId) {
+            Shiny.setInputValue('swap_cards', sourceId + ',' + targetId, {priority: 'event'});
+        }
+    } else {
+        console.log("Drop outside valid target");  // Debug log
+    }
+    Shiny.setInputValue('dragged_card', null, {priority: 'event'});
+}
+
+document.addEventListener('dragover', function(event) {
+    event.preventDefault();
+});
+
+document.addEventListener('drop', function(event) {
+    event.preventDefault();
+    var sourceId = event.dataTransfer.getData("text");
+    console.log("Drop outside grid - Source:", sourceId);  // Debug log
+    Shiny.setInputValue('dragged_card', null, {priority: 'event'});
+    Shiny.setInputValue('drag_ended', Math.random(), {priority: 'event'});
+});
+
+/*
 function drop(event) {
     event.preventDefault();
     var sourceId = event.dataTransfer.getData("text");
@@ -27,4 +57,6 @@ function drop(event) {
     }
     Shiny.setInputValue('dragged_card', null, {priority: 'event'});
 }
+*/
+
 
