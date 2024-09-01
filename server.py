@@ -84,7 +84,7 @@ def server(input, output, session):
                 .card-container { display: flex; flex-direction: column; }
                 .card-row { display: flex; justify-content: flex-start; margin-bottom: 20px; }
                 .card { margin-right: 4px; cursor: pointer; width: 90px; height: 126px; }
-                .card-playable:hover { transform: translateY(-10px); z-index: 10; }
+                .card-playable:hover { transform: translateY(-1px); z-index: 10; }
             """
             ),
             ui.div(
