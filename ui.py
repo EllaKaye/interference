@@ -6,8 +6,7 @@ with open("about.md", "r") as file:
 with open("instructions.md", "r") as file:
     instructions = file.read()
 
-def interference_panel():
-    return ui.nav_panel(
+interference_panel = ui.nav_panel(
         "Interference",
         ui.div(
             ui.row(
@@ -28,44 +27,34 @@ def interference_panel():
             )
         )
     )
+    
 
-def instructions_panel():
+def md_panel(id, md):
     return ui.nav_panel(
-        "Instructions", 
-        ui.row(
-            ui.column(
-                8, 
-                ui.markdown(instructions), 
-                offset=2
-            )
+    id, 
+    ui.row(
+        ui.column(
+            8, 
+            ui.markdown(md), 
+            offset=2
         )
     )
-
-def about_panel():
-    return ui.nav_panel(
-        "About", 
-        ui.row(
-            ui.column(
-                8, 
-                ui.markdown(about), 
-                offset=2
-            )
-        )
-    )
+)
 
 app_ui = ui.page_navbar(
-    interference_panel(),
-    instructions_panel(),
-    about_panel(),
+    interference_panel,
+    md_panel("Instructions", instructions),
+    md_panel("About", about),
     header = ui.tags.head(
         ui.tags.link(rel="stylesheet", href="styles.css"),
         ui.tags.link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Figtree"),
         ui.tags.script(src="js/drag-drop.js"),
         ui.tags.script(src="js/md-navigation.js"),
-        ui.tags.style("""
-        .modal-content {
-            background-color: #156645 !important;
-        }
-    """)
+        ui.tags.style(
+            """
+            .modal-content {
+                background-color: #156645 !important;
+            }
+            """)
     )
 )
