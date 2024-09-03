@@ -12,6 +12,8 @@
 
     - Nothing can go after a King, or after a space.
 
+- When dragging a card and hovering over a space, the space will turn paler green if the move is valid.
+
 - The layout is blocked if there are no valid moves left, i.e. if all spaces are after Kings or other spaces.
 
 - When the layout is blocked, to start a new round, click the 'New Round' button. This will collect and shuffle all the cards that are not yet arranged by suit in ascending order at the start of a row, then deal them out again to fill the rows, leaving one space in each row, after the ordered cards (or a space at the start of the row, if it doesn't yet start with a 2).
