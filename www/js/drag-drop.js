@@ -14,6 +14,24 @@ function dragEnd(event) {
     Shiny.setInputValue('drag_ended', Math.random(), {priority: 'event'});
 }
 
+function dragEnter(event, cardId) {
+    event.preventDefault();
+    const targetElement = event.target.closest('img');
+    if (targetElement) {
+        const isValidTarget = targetElement.dataset.isValidTarget === "true";
+        if (isValidTarget && targetElement.src.endsWith("blank.png")) {
+            targetElement.src = "img/blank_valid.png";
+        }
+    }
+}
+
+function dragLeave(event) {
+    const targetElement = event.target.closest('img');
+    if (targetElement && targetElement.src.endsWith("blank_valid.png")) {
+        targetElement.src = "img/blank.png";
+    }
+}
+
 function allowDrop(event) {
     event.preventDefault();
 }
@@ -27,6 +45,9 @@ function drop(event) {
         console.log("Drop - Source:", sourceId, "Target:", targetId);  // Debug log
         if (sourceId !== targetId) {
             Shiny.setInputValue('swap_cards', sourceId + ',' + targetId, {priority: 'event'});
+        }
+        if (targetElement.src.endsWith("blank_valid.png")) {
+            targetElement.src = "img/blank.png";
         }
     } else {
         console.log("Drop outside valid target");  // Debug log

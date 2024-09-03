@@ -102,8 +102,11 @@ def server(input, output, session):
                                         "ondragend": "dragEnd(event)",
                                         "ondrop": "drop(event)",
                                         "ondragover": "allowDrop(event)",
+                                        "ondragenter": f"dragEnter(event, '{card.value}:{card.suit}')",
+                                        "ondragleave": "dragLeave(event)",              
                                         "id": f"{card.value}:{card.suit}",
                                         "style": "width: 90px; height: 126px;",
+                                        "data-is-valid-target": "true" if is_valid_target(currently_dragged, card) else "false",
                                     }
                                 ),
                                 class_=f"card {'card-playable' if card.value != 'Blank' else ''}"
@@ -115,6 +118,15 @@ def server(input, output, session):
                 ]
             )
         )
+
+    def is_valid_target(dragged_card_id: str, target_card: Card) -> bool:
+        if not dragged_card_id or target_card.value != "Blank":
+            return False
+        
+        dragged_value, dragged_suit = dragged_card_id.split(":")
+        dragged_card = Card(dragged_suit, dragged_value)
+        
+        return game().rows.is_valid_move(dragged_card, target_card)
 
     @reactive.effect
     @reactive.event(input.dragged_card)
