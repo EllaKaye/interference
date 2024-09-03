@@ -5,7 +5,7 @@ where a deck of cards is shuffled and dealt into four rows of thirteen cards.
 The Aces are then removed, leaving spaces. 
 The aim is to sort each row into ascending order, from 2 to King, ending with a space, one row per suit, 
 by moving cards into spaces, one at a time, according to the rules. 
-See the [Instructions](#Instructions) page for full details on how to play.
+See the [Instructions](instructions.md) page for full details on how to play.
 
 I learnt this patience from my grandparents when I was young. 
 In my family, we know it as "interference", 

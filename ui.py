@@ -7,7 +7,7 @@ with open("instructions.md", "r") as file:
     instructions = file.read()
 
 interference_panel = ui.nav_panel(
-        "Interference",
+        "interference",
         ui.div(
             ui.row(
                 ui.column(
@@ -43,8 +43,8 @@ def md_panel(id, md):
 
 app_ui = ui.page_navbar(
     interference_panel,
-    md_panel("Instructions", instructions),
-    md_panel("About", about),
+    md_panel("instructions", instructions),
+    md_panel("about", about),
     header = ui.tags.head(
         ui.tags.link(rel="stylesheet", href="styles.css"),
         ui.tags.link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Figtree"),
