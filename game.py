@@ -160,8 +160,18 @@ class Game:
         self.round_over = self.rows.all_stuck()
         self.game_info_message = f"Round {self.round} of 3"
         self.success = None
-        self.game_over_title = reactive.value("")
-        self.round_over_title = reactive.value("")
+        
+        # Reset reactive values
+        if hasattr(self, 'game_over_title'):
+            self.game_over_title.set("")
+        else:
+            self.game_over_title = reactive.value("")
+        
+        if hasattr(self, 'round_over_title'):
+            self.round_over_title.set("")
+        else:
+            self.round_over_title = reactive.value("")
+
 
     def handle_swap(self, card1_id: str, card2_id: str) -> str:
         # Don't allow swaps if round is over (no valid swaps anyway)
