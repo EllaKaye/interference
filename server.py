@@ -7,7 +7,6 @@ def server(input, output, session):
     game = reactive.value(Game())
     dragged_card: reactive.value[Optional[Card]] = reactive.value(None)
     debug_message = reactive.value("")
-    game_info_message = reactive.value("")
     game_state = reactive.value(0)
 
     @reactive.effect
@@ -18,7 +17,6 @@ def server(input, output, session):
         game_instance.new_game()
         game.set(game_instance)
         dragged_card.set(None)
-        game_info_message.set("New game started")
         debug_message.set("New game started")
         game_state.set(game_state() + 1)
 
@@ -30,7 +28,6 @@ def server(input, output, session):
         game_instance.new_game()
         game.set(game_instance)
         dragged_card.set(None)
-        game_info_message.set("New game started")
         debug_message.set("New game started")
         game_state.set(game_state() + 1)
 
@@ -41,7 +38,6 @@ def server(input, output, session):
         game_instance = game()
         result = game_instance.new_round()
         game.set(game_instance)
-        game_info_message.set("New round started")
         debug_message.set(result)
         game_state.set(game_state() + 1)
 
@@ -52,7 +48,6 @@ def server(input, output, session):
         game_instance = game()
         result = game_instance.new_round()
         game.set(game_instance)
-        game_info_message.set("New round started")
         debug_message.set(result)
         game_state.set(game_state() + 1)
     
@@ -163,7 +158,7 @@ def server(input, output, session):
         return debug_message()
 
     @render.text
-    @reactive.event(game_state)
+    @reactive.event(lambda: game().round())  # React to changes in the round value
     def game_info_output():
         return game().game_info_message
 

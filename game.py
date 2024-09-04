@@ -148,6 +148,8 @@ class Deck:
 
 class Game:
     def __init__(self):
+        self._round = 1  # Non-reactive round counter
+        self.round = reactive.value(self._round)  # Reactive wrapper for round
         self.new_game()
 
     def new_game(self):
@@ -156,9 +158,10 @@ class Game:
         self.rows = self.deck.to_rows()
 
         # Game state
-        self.round = 1
+        self._round = 1
+        self.round.set(self._round)
         self.round_over = self.rows.all_stuck()
-        self.game_info_message = f"Round {self.round} of 3"
+        self.game_info_message = f"Round {self._round} of 3"
         self.success = None
         
         # Reset reactive values
@@ -193,7 +196,7 @@ class Game:
                 if self.success:
                     print("You won!")
                     self.game_over_title.set("Success!")
-                elif self.round == 3 and not self.success:
+                elif self._round == 3 and not self.success:
                     print("Game over. Click 'New Game' to try again.")
                     self.game_over_title.set("Game over")
                 else:               
@@ -205,14 +208,15 @@ class Game:
             return f"Invalid move: Cannot swap {card1} with {card2}"
 
     def new_round(self):
-        if self.round == 3:
+        if self._round == 3:
             self.game_over_title.set("Out of rounds")
             return "Out of rounds"
 
         self.round_over = False
         self.round_over_title.set("")
-        self.round += 1
-        self.game_info_message = f"Round {self.round} of 3"
+        self._round += 1
+        self.round.set(self._round)
+        self.game_info_message = f"Round {self.round()} of 3"
 
         ordered, unordered = self.rows.ordered_unordered()
         self.rows = Rows([Row(row) for row in ordered])
@@ -234,6 +238,9 @@ class Game:
         for row in self.rows:
             row.fill_row(unordered_deck.cards)
 
-        return f"Starting Round {self.round}"
+        return f"Starting Round {self._round}"
+
+    def get_round(self):
+        return self._round
 
 
