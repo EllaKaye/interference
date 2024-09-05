@@ -52,9 +52,11 @@ app_ui = ui.page_navbar(
         ui.tags.script(src="js/md-navigation.js"),
         ui.tags.style(
             """
-            .modal-content {
-                background-color: #156645 !important;
-            }
+            .modal-content { background-color: #156645 !important; }
+            .card-container { display: flex; flex-direction: column; }
+            .card-row { display: flex; justify-content: flex-start; margin-bottom: 20px; }
+            .card { margin-right: 4px; cursor: pointer; width: 90px; height: 126px; }
+            .card-playable:hover { transform: translateY(-1px); z-index: 10; }
             """)
     )
 )

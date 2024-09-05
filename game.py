@@ -240,7 +240,4 @@ class Game:
 
         return f"Starting Round {self._round}"
 
-    def get_round(self):
-        return self._round
-
 

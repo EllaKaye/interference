@@ -38,6 +38,7 @@ def server(input, output, session):
         game_instance = game()
         result = game_instance.new_round()
         game.set(game_instance)
+        dragged_card.set(None)
         debug_message.set(result)
         game_state.set(game_state() + 1)
 
@@ -48,6 +49,7 @@ def server(input, output, session):
         game_instance = game()
         result = game_instance.new_round()
         game.set(game_instance)
+        dragged_card.set(None)
         debug_message.set(result)
         game_state.set(game_state() + 1)
     
@@ -74,14 +76,6 @@ def server(input, output, session):
         currently_dragged = dragged_card.get()
         #print(f"Rendering cards. Currently dragged: {currently_dragged}")  # Debug print
         return ui.div(
-            ui.tags.style(
-                """
-                .card-container { display: flex; flex-direction: column; }
-                .card-row { display: flex; justify-content: flex-start; margin-bottom: 20px; }
-                .card { margin-right: 4px; cursor: pointer; width: 90px; height: 126px; }
-                .card-playable:hover { transform: translateY(-1px); z-index: 10; }
-            """
-            ),
             ui.div(
                 {"class": "card-container"},
                 [
