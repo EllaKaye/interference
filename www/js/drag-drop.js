@@ -1,17 +1,62 @@
-// enables draging and droping of cards
+// enables dragging and dropping of cards
 
-// written by Shiny Assistant
+let dragFeedback = null;
 
 function dragStart(event) {
     event.dataTransfer.setData("text/plain", event.target.id);
     console.log("Drag started:", event.target.id);  // Debug log
     Shiny.setInputValue('dragged_card', event.target.id, {priority: 'event'});
+
+    // Force opacity to 1
+    event.target.style.opacity = '1';
+    
+    // Disable the default ghost image
+    var emptyImage = document.createElement('img');
+    emptyImage.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+    event.dataTransfer.setDragImage(emptyImage, 0, 0);
+    
+    // Create a visual drag feedback
+    dragFeedback = event.target.cloneNode(true);
+    dragFeedback.style.position = 'fixed';
+    dragFeedback.style.zIndex = '1000';
+    dragFeedback.style.pointerEvents = 'none';
+    dragFeedback.style.opacity = '1';
+    document.body.appendChild(dragFeedback);
+    
+    // Update the position of the drag feedback
+    function updateDragFeedback(e) {
+        dragFeedback.style.left = (e.clientX - dragFeedback.offsetWidth / 2) + 'px';
+        dragFeedback.style.top = (e.clientY - dragFeedback.offsetHeight / 2) + 'px';
+    }
+    
+    document.addEventListener('dragover', updateDragFeedback);
+    
+    // Clean up
+    function cleanUp() {
+        if (dragFeedback && dragFeedback.parentNode) {
+            document.body.removeChild(dragFeedback);
+        }
+        dragFeedback = null;
+        document.removeEventListener('dragover', updateDragFeedback);
+        document.removeEventListener('dragend', cleanUp);
+    }
+    
+    document.addEventListener('dragend', cleanUp);
 }
 
 function dragEnd(event) {
     console.log("Drag ended:", event.target.id);  // Debug log
     Shiny.setInputValue('dragged_card', null, {priority: 'event'});
     Shiny.setInputValue('drag_ended', Math.random(), {priority: 'event'});
+    
+    // Reset opacity
+    event.target.style.opacity = '';
+
+    // Ensure dragFeedback is removed
+    if (dragFeedback && dragFeedback.parentNode) {
+        document.body.removeChild(dragFeedback);
+    }
+    dragFeedback = null;
 }
 
 function dragEnter(event, cardId) {
@@ -53,6 +98,12 @@ function drop(event) {
         console.log("Drop outside valid target");  // Debug log
     }
     Shiny.setInputValue('dragged_card', null, {priority: 'event'});
+
+    // Ensure dragFeedback is removed
+    if (dragFeedback && dragFeedback.parentNode) {
+        document.body.removeChild(dragFeedback);
+    }
+    dragFeedback = null;
 }
 
 document.addEventListener('dragover', function(event) {
@@ -65,19 +116,10 @@ document.addEventListener('drop', function(event) {
     console.log("Drop outside grid - Source:", sourceId);  // Debug log
     Shiny.setInputValue('dragged_card', null, {priority: 'event'});
     Shiny.setInputValue('drag_ended', Math.random(), {priority: 'event'});
-});
 
-/*
-function drop(event) {
-    event.preventDefault();
-    var sourceId = event.dataTransfer.getData("text");
-    var targetId = event.target.closest('img').id;  // Get the ID of the closest img element
-    console.log("Drop - Source:", sourceId, "Target:", targetId);  // Debug log
-    if (sourceId !== targetId) {
-        Shiny.setInputValue('swap_cards', sourceId + ',' + targetId, {priority: 'event'}); // Reset the dragged card state after a drop, regardless of whether the swap was valid or not
+    // Ensure dragFeedback is removed
+    if (dragFeedback && dragFeedback.parentNode) {
+        document.body.removeChild(dragFeedback);
     }
-    Shiny.setInputValue('dragged_card', null, {priority: 'event'});
-}
-*/
-
-
+    dragFeedback = null;
+});
