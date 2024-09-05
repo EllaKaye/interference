@@ -56,8 +56,8 @@ app_ui = ui.page_navbar(
             .card-container { display: flex; flex-direction: column; }
             .card-row { display: flex; justify-content: flex-start; margin-bottom: 20px; }
             .card { margin-right: 4px; cursor: pointer; width: 90px; height: 126px; }
+            .card-playable { transition: transform 0.2s ease-out; }
             .card-playable:hover { transform: translateY(-1px); z-index: 10; }
-            img { opacity: 1 !important; }
             """)
     )
 )
