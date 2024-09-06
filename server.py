@@ -1,10 +1,16 @@
 from shiny import reactive, render
 from game import Game, Card
 from ui import card_ui
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def server(input, output, session):
     game = reactive.Value(None)
     card_positions = reactive.Value(None)
+    selected_card = reactive.Value(None)
 
     def initialize_game():
         game_instance = Game()
@@ -21,6 +27,7 @@ def server(input, output, session):
     @reactive.event(input.new_game)
     def _():
         initialize_game()
+        selected_card.set(None)
 
     @reactive.Effect
     @reactive.event(input.new_round)
@@ -30,6 +37,7 @@ def server(input, output, session):
         game.set(game_instance)
         card_pos = [[reactive.Value(card) for card in row] for row in game_instance.rows]
         card_positions.set(card_pos)
+        selected_card.set(None)
 
     def create_card_render(i, j):
         @output(id=f"card_{i*13+j}")
@@ -44,21 +52,78 @@ def server(input, output, session):
     @reactive.Effect
     @reactive.event(input.swap_cards)
     def _():
-        if input.swap_cards() is None:
+        swap_data = input.swap_cards()
+        logger.info(f"Received swap_cards event with data: {swap_data}")
+        
+        if swap_data is None:
+            logger.warning("swap_cards event received with None data")
             return
 
-        card1_str = input.swap_cards()['card1']
-        card2_str = input.swap_cards()['card2']
+        try:
+            card1_str = swap_data['card1']
+            card2_str = swap_data['card2']
+        except KeyError as e:
+            logger.error(f"KeyError when accessing swap_cards data: {e}")
+            return
+
+        logger.info(f"Attempting to swap cards: {card1_str} and {card2_str}")
 
         game_instance = game()
-        result = game_instance.handle_swap(card1_str, card2_str)
+        try:
+            result = game_instance.handle_swap(card1_str, card2_str)
+            logger.info(f"Swap result: {result}")
+        except ValueError as e:
+            logger.error(f"ValueError in handle_swap: {e}")
+            return
+        except Exception as e:
+            logger.error(f"Unexpected error in handle_swap: {e}")
+            return
+
         game.set(game_instance)
 
         if result:
-            # Update card_positions only if the swap was successful
+            logger.info("Updating card positions after successful swap")
             for i, row in enumerate(game_instance.rows):
                 for j, card in enumerate(row):
                     card_positions()[i][j].set(card)
+        else:
+            logger.info("Swap was unsuccessful, not updating card positions")
+
+    @reactive.Effect
+    @reactive.event(input.card_clicked)
+    def _():
+        clicked_card = input.card_clicked()
+        logger.info(f"Card clicked: {clicked_card}")
+        
+        if selected_card() is None:
+            logger.info(f"Setting selected card to: {clicked_card}")
+            selected_card.set(clicked_card)
+        else:
+            logger.info(f"Attempting to swap {selected_card()} with {clicked_card}")
+            game_instance = game()
+            try:
+                result = game_instance.handle_swap(selected_card(), clicked_card)
+                logger.info(f"Swap result: {result}")
+            except ValueError as e:
+                logger.error(f"ValueError in handle_swap: {e}")
+                selected_card.set(None)
+                return
+            except Exception as e:
+                logger.error(f"Unexpected error in handle_swap: {e}")
+                selected_card.set(None)
+                return
+
+            game.set(game_instance)
+
+            if result:
+                logger.info("Updating card positions after successful swap")
+                for i, row in enumerate(game_instance.rows):
+                    for j, card in enumerate(row):
+                        card_positions()[i][j].set(card)
+            else:
+                logger.info("Swap was unsuccessful, not updating card positions")
+
+            selected_card.set(None)
 
     @render.text
     @reactive.event(game)
@@ -67,9 +132,14 @@ def server(input, output, session):
             return ""
         return game().game_info_message
 
+    # Add a debug output
+    @render.text
+    def debug_output():
+        return f"Selected card: {selected_card()}"
+
     # ... (keep other reactive effects and renderers from your original server function)
 
-
+# ... (keep other reactive effects and renderers from your original server function)
 # def server(input, output, session):
 #     game = reactive.value(Game())
 #     dragged_card: reactive.value[Optional[Card]] = reactive.value(None)

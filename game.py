@@ -1,6 +1,9 @@
 from shiny import reactive
 import random
 from typing import Optional, Tuple
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Card constants
 CARD_VALUES = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "Blank"]
@@ -176,37 +179,50 @@ class Game:
             self.round_over_title = reactive.value("")
 
 
-    def handle_swap(self, card1_id: str, card2_id: str) -> str:
-        # Don't allow swaps if round is over (no valid swaps anyway)
-        if self.round_over:
-            return "Can't move card when the round/game is over"
+    def handle_swap(self, card1_id: str, card2_id: str) -> bool:
+        logger.info(f"Handling swap for cards: {card1_id} and {card2_id}")
+        
+        def parse_card_id(card_id):
+            parts = card_id.split(":")
+            if len(parts) != 2:
+                logger.error(f"Invalid card ID format: {card_id}")
+                return None, None
+            value, suit = parts
+            return value, suit
 
-        card1_value, card1_suit = card1_id.split(":")
-        card2_value, card2_suit = card2_id.split(":")
+        card1_value, card1_suit = parse_card_id(card1_id)
+        card2_value, card2_suit = parse_card_id(card2_id)
 
-        card1 = Card(card1_suit, card1_value)
-        card2 = Card(card2_suit, card2_value)
+        if None in (card1_value, card1_suit, card2_value, card2_suit):
+            return False
+
+        try:
+            card1 = Card(card1_suit, card1_value)
+            card2 = Card(card2_suit, card2_value)
+        except Exception as e:
+            logger.error(f"Error creating Card objects: {e}")
+            return False
 
         if self.rows.swap_cards(card1, card2):
-            # after swap, check new game state
+            logger.info("Swap successful")
             self.round_over = self.rows.all_stuck()
-            #self.round_over.set(self.rows.all_stuck())
             if self.round_over:
                 self.success = self.rows.all_ordered()
                 if self.success:
-                    print("You won!")
-                    self.game_over_title.set("Success!")
+                    logger.info("Game won!")
+                    self.game_over_title = "Success!"
                 elif self._round == 3 and not self.success:
-                    print("Game over. Click 'New Game' to try again.")
-                    self.game_over_title.set("Game over")
+                    logger.info("Game over")
+                    self.game_over_title = "Game over"
                 else:               
-                    print("Round over. Click 'New Round' to continue.")
-                    self.round_over_title.set("Round over")
-
+                    logger.info("Round over")
+                    self.round_over_title = "Round over"
             return True
         else:
+            logger.info("Swap unsuccessful")
             return False
 
+    
     def new_round(self):
         if self._round == 3:
             self.game_over_title.set("Out of rounds")

@@ -7,9 +7,9 @@ let dragFeedback = null;
 let isDragging = false;
 
 function dragStart(event) {
-    event.dataTransfer.setData("text/plain", event.target.id);
-    console.log("Drag started:", event.target.id);  // Debug log
-    Shiny.setInputValue('dragged_card', event.target.id, {priority: 'event'});
+    event.dataTransfer.setData("text/plain", event.target.closest('.card').id);
+    console.log("Drag started:", event.target.closest('.card').id);
+    Shiny.setInputValue('dragged_card', event.target.getAttribute('data-card'), {priority: 'event'});
 
     // Step 1: Immediately set a 1x1 transparent image as the drag image
     let emptyImage = new Image();
@@ -57,29 +57,27 @@ function dragStart(event) {
 }
 
 function dragEnd(event) {
-    console.log("Drag ended:", event.target.id);  // Debug log
+    console.log("Drag ended:", event.target.closest('.card').id);
     Shiny.setInputValue('dragged_card', null, {priority: 'event'});
     Shiny.setInputValue('drag_ended', Math.random(), {priority: 'event'});
     isDragging = false;
 }
 
-// ... rest of the file remains the same
-
 function dragEnter(event, cardId) {
     event.preventDefault();
-    const targetElement = event.target.closest('img');
+    const targetElement = event.target.closest('.card-image');
     if (targetElement) {
-        const isValidTarget = targetElement.dataset.isValidTarget === "true";
-        if (isValidTarget && targetElement.src.endsWith("blank.png")) {
-            targetElement.src = "img/blank_valid.png";
+        const isValidTarget = targetElement.getAttribute('data-card').split(':')[0] === "Blank";
+        if (isValidTarget) {
+            targetElement.src = "https://raw.githubusercontent.com/EllaKaye/interference/main/www/img/blank_valid.png";
         }
     }
 }
 
 function dragLeave(event) {
-    const targetElement = event.target.closest('img');
+    const targetElement = event.target.closest('.card-image');
     if (targetElement && targetElement.src.endsWith("blank_valid.png")) {
-        targetElement.src = "img/blank.png";
+        targetElement.src = "https://raw.githubusercontent.com/EllaKaye/interference/main/www/img/blank.png";
     }
 }
 
@@ -90,18 +88,22 @@ function allowDrop(event) {
 function drop(event) {
     event.preventDefault();
     var sourceId = event.dataTransfer.getData("text");
-    var targetElement = event.target.closest('img');
+    var targetElement = event.target.closest('.card');
     if (targetElement) {
         var targetId = targetElement.id;
-        console.log("Drop - Source:", sourceId, "Target:", targetId);  // Debug log
+        console.log("Drop - Source:", sourceId, "Target:", targetId);
         if (sourceId !== targetId) {
-            Shiny.setInputValue('swap_cards', sourceId + ',' + targetId, {priority: 'event'});
+            let sourceCard = document.getElementById(sourceId).querySelector('img').getAttribute('data-card');
+            let targetCard = targetElement.querySelector('img').getAttribute('data-card');
+            console.log("Sending swap_cards event with data:", {card1: sourceCard, card2: targetCard});
+            Shiny.setInputValue('swap_cards', {card1: sourceCard, card2: targetCard}, {priority: 'event'});
         }
-        if (targetElement.src.endsWith("blank_valid.png")) {
-            targetElement.src = "img/blank.png";
+        let blankImage = targetElement.querySelector('img[src$="blank_valid.png"]');
+        if (blankImage) {
+            blankImage.src = "https://raw.githubusercontent.com/EllaKaye/interference/main/www/img/blank.png";
         }
     } else {
-        console.log("Drop outside valid target");  // Debug log
+        console.log("Drop outside valid target");
     }
     Shiny.setInputValue('dragged_card', null, {priority: 'event'});
 
@@ -111,6 +113,12 @@ function drop(event) {
     }
     dragFeedback = null;
 }
+
+$(document).on('click', '.card', function() {
+    let cardData = $(this).find('img').attr('data-card');
+    console.log("Card clicked:", cardData);
+    Shiny.setInputValue('card_clicked', cardData, {priority: 'event'});
+});
 
 document.addEventListener('dragover', function(event) {
     event.preventDefault();

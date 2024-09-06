@@ -2,10 +2,22 @@ from shiny import ui
 
 def card_ui(card_id, card):
     return ui.div(
-        ui.img(src=card.image_path(), class_="card-image"),
+        ui.img(
+            src=card.image_path(),
+            class_="card-image",
+            draggable="true",
+            **{
+                "data-card": f"{card.value}:{card.suit}",
+                "ondragstart": "dragStart(event)",
+                "ondragend": "dragEnd(event)",
+                "ondrop": "drop(event)",
+                "ondragover": "allowDrop(event)",
+                "ondragenter": f"dragEnter(event, '{card.value}:{card.suit}')",
+                "ondragleave": "dragLeave(event)",
+            }
+        ),
         class_="card",
         id=card_id,
-        **{"data-card": f"{card.value}{card.suit}"}
     )
 
 interference_panel = ui.nav_panel(
@@ -63,6 +75,7 @@ app_ui = ui.page_navbar(
         ui.tags.link(rel="stylesheet", href="styles.css"),
         ui.tags.link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Figtree"),
         ui.tags.script(src="js/card-selection.js"),
+        ui.tags.script(src="js/drag-drop.js"),
         ui.tags.script(src="js/md-navigation.js"),
         ui.tags.style(
             """
