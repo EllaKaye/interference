@@ -203,9 +203,9 @@ class Game:
                     print("Round over. Click 'New Round' to continue.")
                     self.round_over_title.set("Round over")
 
-            return f"Swapped {card1} with {card2}"
+            return True
         else:
-            return f"Invalid move: Cannot swap {card1} with {card2}"
+            return False
 
     def new_round(self):
         if self._round == 3:
