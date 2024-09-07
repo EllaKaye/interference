@@ -1,33 +1,65 @@
 from shiny import ui
 
+def card_ui(card_id, card):
+    return ui.div(
+        ui.img(
+            src=card.image_path(),
+            class_="card-image",
+            draggable="true",
+            **{
+                "data-card": f"{card.value}:{card.suit}",
+                "ondragstart": "dragStart(event)",
+                "ondragend": "dragEnd(event)",
+                "ondrop": "drop(event)",
+                "ondragover": "allowDrop(event)",
+                "ondragenter": f"dragEnter(event, '{card.value}:{card.suit}')",
+                "ondragleave": "dragLeave(event)",
+            }
+        ),
+        #class_="card",
+        class_=f"card {'card-playable' if card.value != 'Blank' else ''}",
+        id=card_id,
+    )
+
+interference_panel = ui.nav_panel(
+    "interference",
+    ui.div(
+        ui.row(
+            ui.column(
+                10,
+                ui.div(
+                    ui.input_action_button("new_game", "New Game"),
+                    ui.input_action_button("new_round", "New Round"),
+                ),
+                ui.div(
+                    ui.output_text("game_info_output"),
+                    style="margin-bottom: 10px; font-size: 120%",
+                ),
+                ui.div(
+                    *[ui.div(
+                        *[ui.output_ui(f"card_{i*13+j}") for j in range(13)],
+                        class_="row",
+                    ) for i in range(4)],
+                    class_="cards-container"
+                ),
+                offset=1
+            )
+        )
+    )
+)
+
+
 with open("about.md", "r") as file:
     about = file.read()
 
 with open("instructions.md", "r") as file:
     instructions = file.read()
 
-interference_panel = ui.nav_panel(
-        "interference",
-        ui.div(
-            ui.row(
-                ui.column(
-                    10,
-                    ui.div(
-                        ui.input_action_button("new_game", "New Game"),
-                        ui.input_action_button("new_round", "New Round"),
-                    ),
-                    ui.div(
-                        ui.output_text("game_info_output"),
-                        style="margin-bottom: 10px; font-size: 120%",
-                    ),
-                    ui.output_ui("cards"),
-                    # ui.output_text("debug_output"),
-                    offset=1
-                )
-            )
-        )
-    )
-    
+# some styles, which need to override the bootstrap defaults,
+# need to be in a style tag, rather than linking to a css stylesheet in a link tag
+# so read in the file here
+with open("styles.css", "r") as file:
+    styles = file.read()
 
 def md_panel(id, md):
     return ui.nav_panel(
@@ -41,23 +73,21 @@ def md_panel(id, md):
     )
 )
 
+
 app_ui = ui.page_navbar(
     interference_panel,
     md_panel("instructions", instructions),
     md_panel("about", about),
     header = ui.tags.head(
-        ui.tags.link(rel="stylesheet", href="styles.css"),
         ui.tags.link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Figtree"),
+        ui.tags.style(styles),  # some styles need to override bootstrap defaults so have to be in style tag
+        ui.tags.script(src="js/card-selection.js"),
         ui.tags.script(src="js/drag-drop.js"),
-        ui.tags.script(src="js/md-navigation.js"),
-        ui.tags.style(
-            """
-            .modal-content { background-color: #156645 !important; }
-            .card-container { display: flex; flex-direction: column; }
-            .card-row { display: flex; justify-content: flex-start; margin-bottom: 20px; }
-            .card { margin-right: 4px; cursor: pointer; width: 90px; height: 126px; }
-            .card-playable { transition: transform 0.2s ease-out; }
-            .card-playable:hover { transform: translateY(-1px); z-index: 10; }
-            """)
+        ui.tags.script(src="js/md-navigation.js")
     )
 )
+
+
+
+
+

@@ -1,0 +1,97 @@
+.modal-content {
+    background-color: #156645 !important;
+}
+.cards-container {
+    display: grid;
+    grid-template-columns: repeat(13, 1fr);
+    gap: calc(1vw + 2px) 2px;
+    justify-items: center;
+}
+.row {
+    display: contents;
+}
+.card {
+    box-shadow: none;
+    border: none;
+    margin: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+.card-image {
+    width: 100%;
+    height: auto;
+    max-width: calc(100vw / 15);
+}
+
+@media (max-width: 1200px) {
+    .cards-container {
+        gap: calc(1.5vw + 5px) 1px;
+    }
+    .card-image {
+        max-width: calc(100vw / 14);
+    }
+}
+@media (max-width: 900px) {
+    .cards-container {
+        gap: calc(1vw + 5px) 1px;
+    }
+    .card-image {
+        max-width: calc(100vw / 13);
+    }
+}
+@media (max-width: 600px) {
+    .cards-container {
+        gap: calc(0.5vw + 5px) 1px;
+    }
+    .card-image {
+        max-width: calc(100vw / 12);
+    }
+}
+
+body {
+    background-color: #156645; 
+    font-family: 'Figtree', sans-serif;
+    color: white;
+}
+.card img {
+    box-shadow: none;
+    border: none;
+    display: block;
+    background-color: #156645;
+}
+
+
+.card-playable:hover {
+    transform: translateY(-1px);
+}
+
+.card-playable.selected {
+    transform: translateY(-5px);
+}
+
+
+.action-button {
+    color: white;
+    border-color: white;
+    background-color: #197C54;
+    padding: 12px 18px;
+    margin-right: 6px;
+    margin-bottom: 10px;
+}
+.action-button:hover {
+    background-color: white;
+    color: #197C54;
+    border-color: white;
+}
+.navbar-nav .nav-link {
+    color: #115439 !important;
+    font-size: 18px;
+    text-transform: uppercase;
+    transition: color 0.3s;
+}
+
+a {
+    color: white;
+}
+
