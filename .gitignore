@@ -6,4 +6,3 @@ app-ui*
 www/img/png
 image_convert_batch.py
 image_convert_test.py
-www/img/webp
