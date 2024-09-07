@@ -99,46 +99,58 @@ def server(input, output, session):
         for j in range(13):
             create_card_render(i, j)
 
-    ### swap cards
+
     @reactive.effect
-    @reactive.event(input.swap_cards)  # updated in the drag-drop.js files
-    def _():
+    @reactive.event(input.drag_ended)
+    def handle_drag_end():
+        drag_end_data = input.drag_ended()
+        if drag_end_data and isinstance(drag_end_data, dict):
+            card_id = drag_end_data['id']
+            original_src = drag_end_data['originalSrc']
+            # If no swap occurred, ensure the card is reverted to its original state
+            parts = card_id.split('_')
+            if len(parts) >= 3:
+                i, j = int(parts[1]), int(parts[2])
+                current_card = card_positions()[i][j]()
+                if current_card.image_path() == "img/webp/blank.webp":
+                    # Recreate the original card based on the original_src
+                    suit = original_src.split('/')[-1].split('.')[0][-1]
+                    value = original_src.split('/')[-1].split('.')[0][:-1]
+                    original_card = Card(suit, value)
+                    card_positions()[i][j].set(original_card)
+
+    @reactive.effect
+    @reactive.event(input.swap_cards)
+    def handle_swap():
         swap_data = input.swap_cards()
-        logger.info(f"Received swap_cards event with data: {swap_data}")
-        
         if swap_data is None:
-            logger.warning("swap_cards event received with None data")
             return
 
-        try:
-            card1_str = swap_data['card1']
-            card2_str = swap_data['card2']
-        except KeyError as e:
-            logger.error(f"KeyError when accessing swap_cards data: {e}")
-            return
-
-        logger.info(f"Attempting to swap cards: {card1_str} and {card2_str}")
+        card1_str = swap_data['card1']
+        card2_str = swap_data['card2']
+        swap_method = swap_data.get('method', 'click')
 
         game_instance = game()
-        try:
-            result = game_instance.handle_swap(card1_str, card2_str)
-            logger.info(f"Swap result: {result}")
-        except ValueError as e:
-            logger.error(f"ValueError in handle_swap: {e}")
-            return
-        except Exception as e:
-            logger.error(f"Unexpected error in handle_swap: {e}")
-            return
-
+        result = game_instance.handle_swap(card1_str, card2_str)
         game.set(game_instance)
 
         if result:
-            logger.info("Updating card positions after successful swap")
+            # Update card positions after successful swap
             for i, row in enumerate(game_instance.rows):
                 for j, card in enumerate(row):
                     card_positions()[i][j].set(card)
-        else:
-            logger.info("Swap was unsuccessful, not updating card positions")
+        elif swap_method == 'drag':
+            # If drag swap was unsuccessful, revert the source card
+            source_id = swap_data.get('sourceId', '')
+            parts = source_id.split('_')
+            if len(parts) >= 3:
+                i, j = int(parts[1]), int(parts[2])
+                suit, value = card1_str.split(':')
+                original_card = Card(suit, value)
+                card_positions()[i][j].set(original_card)
+            else:
+                print(f"Warning: Invalid source_id format: {source_id}")
+
 
 
     @reactive.effect

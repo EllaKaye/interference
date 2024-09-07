@@ -5,11 +5,103 @@
 
 let dragFeedback = null;
 let isDragging = false;
+let originalCardSrc = null;
+let draggedCardId = null;
 
 function dragStart(event) {
-    event.dataTransfer.setData("text/plain", event.target.closest('.card').id);
-    console.log("Drag started:", event.target.closest('.card').id);
-    Shiny.setInputValue('dragged_card', event.target.getAttribute('data-card'), {priority: 'event'});
+    const card = event.target.closest('.card');
+    draggedCardId = card.id;
+    const cardImg = card.querySelector('img');
+    originalCardSrc = cardImg.src;
+    
+    // Change the image in the grid to blank.webp
+    cardImg.src = "img/webp/blank.webp";
+
+    event.dataTransfer.setData("text/plain", card.id);
+    console.log("Drag started:", card.id);
+    Shiny.setInputValue('dragged_card', cardImg.getAttribute('data-card'), {priority: 'event'});
+
+    // Create drag feedback
+    requestAnimationFrame(() => {
+        if (isDragging) return;
+        isDragging = true;
+
+        // Create a new image element for drag feedback
+        dragFeedback = new Image();
+        dragFeedback.src = originalCardSrc;
+        dragFeedback.style.position = 'fixed';
+        dragFeedback.style.zIndex = '1000';
+        dragFeedback.style.pointerEvents = 'none';
+        dragFeedback.style.opacity = '1'; // Fully opaque
+        dragFeedback.style.width = cardImg.width + 'px'; // Set width to match original card
+        dragFeedback.style.height = cardImg.height + 'px'; // Set height to match original card
+        dragFeedback.style.transform = 'translate(-50%, -50%)';
+        document.body.appendChild(dragFeedback);
+
+        function updateDragFeedback(e) {
+            if (!isDragging) return;
+            dragFeedback.style.left = e.clientX + 'px';
+            dragFeedback.style.top = e.clientY + 'px';
+        }
+        
+        document.addEventListener('dragover', updateDragFeedback);
+        
+        // Trigger initial position update
+        updateDragFeedback(event);
+        
+        // Clean up
+        function cleanUp() {
+            isDragging = false;
+            if (dragFeedback && dragFeedback.parentNode) {
+                document.body.removeChild(dragFeedback);
+            }
+            dragFeedback = null;
+            document.removeEventListener('dragover', updateDragFeedback);
+            document.removeEventListener('dragend', cleanUp);
+        }
+        
+        document.addEventListener('dragend', cleanUp);
+    });
+
+    // Prevent the default drag image
+    var img = new Image();
+    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+    event.dataTransfer.setDragImage(img, 0, 0);
+}
+
+function dragEnd(event) {
+    console.log("Drag ended:", draggedCardId);
+    
+    // Revert the image if no swap occurred
+    const cardImg = document.getElementById(draggedCardId).querySelector('img');
+    if (cardImg.src.endsWith("blank.webp")) {
+        cardImg.src = originalCardSrc;
+    }
+    
+    Shiny.setInputValue('dragged_card', null, {priority: 'event'});
+    Shiny.setInputValue('drag_ended', {
+        id: draggedCardId,
+        originalSrc: originalCardSrc
+    }, {priority: 'event'});
+    
+    isDragging = false;
+    draggedCardId = null;
+    originalCardSrc = null;
+}
+
+/*
+function dragStart(event) {
+    const card = event.target.closest('.card');
+    draggedCardId = card.id;
+    const cardImg = card.querySelector('img');
+    originalCardSrc = cardImg.src;
+    
+    // Change the image in the grid to blank.webp
+    cardImg.src = "img/webp/blank.webp";
+
+    event.dataTransfer.setData("text/plain", card.id);
+    console.log("Drag started:", card.id);
+    Shiny.setInputValue('dragged_card', cardImg.getAttribute('data-card'), {priority: 'event'});
 
     // Step 1: Immediately set a 1x1 transparent image as the drag image
     let emptyImage = new Image();
@@ -56,12 +148,27 @@ function dragStart(event) {
     });
 }
 
+
 function dragEnd(event) {
-    console.log("Drag ended:", event.target.closest('.card').id);
+    console.log("Drag ended:", draggedCardId);
+    
+    // Revert the image if no swap occurred
+    const cardImg = document.getElementById(draggedCardId).querySelector('img');
+    if (cardImg.src.endsWith("blank.webp")) {
+        cardImg.src = originalCardSrc;
+    }
+    
     Shiny.setInputValue('dragged_card', null, {priority: 'event'});
-    Shiny.setInputValue('drag_ended', Math.random(), {priority: 'event'});
+    Shiny.setInputValue('drag_ended', {
+        id: draggedCardId,
+        originalSrc: originalCardSrc
+    }, {priority: 'event'});
+    
     isDragging = false;
+    draggedCardId = null;
+    originalCardSrc = null;
 }
+    */
 
 function dragEnter(event, cardId) {
     event.preventDefault();
@@ -95,19 +202,30 @@ function drop(event) {
         if (sourceId !== targetId) {
             let sourceCard = document.getElementById(sourceId).querySelector('img').getAttribute('data-card');
             let targetCard = targetElement.querySelector('img').getAttribute('data-card');
-            console.log("Sending swap_cards event with data:", {card1: sourceCard, card2: targetCard});
-            Shiny.setInputValue('swap_cards', {card1: sourceCard, card2: targetCard}, {priority: 'event'});
+            console.log("Sending swap_cards event with data:", {card1: sourceCard, card2: targetCard, sourceId: sourceId, targetId: targetId});
+            Shiny.setInputValue('swap_cards', {
+                card1: sourceCard, 
+                card2: targetCard,
+                sourceId: sourceId,
+                targetId: targetId,
+                method: 'drag'  // Indicate this was a drag-and-drop swap
+            }, {priority: 'event'});
+        } else {
+            // If dropped on itself, revert the image
+            document.getElementById(sourceId).querySelector('img').src = originalCardSrc;
         }
-        let blankImage = targetElement.querySelector('img[src$="blank_valid.png"]');
+        let blankImage = targetElement.querySelector('img[src$="blank_valid.webp"]');
         if (blankImage) {
-            blankImage.src = "https://raw.githubusercontent.com/EllaKaye/interference/main/www/img/blank.png";
+            blankImage.src = "img/webp/blank.webp";
         }
     } else {
         console.log("Drop outside valid target");
+        // Revert the image if dropped outside a valid target
+        document.getElementById(sourceId).querySelector('img').src = originalCardSrc;
     }
     Shiny.setInputValue('dragged_card', null, {priority: 'event'});
 
-    // Ensure dragFeedback is removed
+    // Remove drag feedback
     if (dragFeedback && dragFeedback.parentNode) {
         document.body.removeChild(dragFeedback);
     }

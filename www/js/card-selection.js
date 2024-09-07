@@ -31,7 +31,13 @@ $(document).on('click', '.card', function() {
             $(this).addClass('selected');
         } else {
             // If the clicked card is a "Blank", attempt to swap
-            Shiny.setInputValue('swap_cards', {card1: card1, card2: card2}, {priority: 'event'});
+            Shiny.setInputValue('swap_cards', {
+                card1: card1, 
+                card2: card2,
+                sourceId: $(selectedCard).attr('id'),
+                targetId: $(this).attr('id'),
+                method: 'click'  // Indicate this was a click-based swap
+            }, {priority: 'event'});
             $(selectedCard).removeClass('selected');
             selectedCard = null;
         }
