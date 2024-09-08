@@ -137,6 +137,17 @@ def server(input, output, session):
 
             selected_card.set(None)
 
+
+    @reactive.effect
+    @reactive.event(input.drag_started)
+    async def handle_drag_start():
+        drag_start_data = input.drag_started()
+        if drag_start_data:
+            dragged_card.set(drag_start_data['cardId'])
+            # Update the UI to show a blank card in the original position
+            row, col = drag_start_data['position']
+            card_positions()[row][col].set(Card('S', 'Blank'))
+
     @reactive.effect
     @reactive.event(input.drag_started)
     def handle_drag_start():
@@ -173,7 +184,8 @@ def server(input, output, session):
         if swap_data is None:
             return
 
-        card1_str = swap_data['card1']
+        #card1_str = swap_data['card1']
+        card1_str = dragged_card()
         card2_str = swap_data['card2']
         swap_method = swap_data.get('method', 'click')
 
