@@ -13,7 +13,6 @@ def server(input, output, session):
     card_positions = reactive.value(None)
     selected_card = reactive.value(None)
     dragged_card = reactive.value(None)
-    swap_method = reactive.value(None)
     
     ### set up the game
     def initialize_game():
@@ -102,45 +101,17 @@ def server(input, output, session):
 
     ## Respond to clicks and drags
     @reactive.effect
-    @reactive.event(input.card_clicked)  # set in card-selection.js
+    @reactive.event(input.card_clicked)
     def handle_card_click():
         clicked_card = input.card_clicked()
         logger.info(f"Card clicked: {clicked_card}")
-        
-        if selected_card() is None:
-            logger.info(f"Setting selected card to: {clicked_card}")
-            selected_card.set(clicked_card)
-        else:
-            logger.info(f"Attempting to swap {selected_card()} with {clicked_card}")
-            game_instance = game()
-            try:
-                result = game_instance.handle_swap(selected_card(), clicked_card)
-                logger.info(f"Swap result: {result}")
-            except ValueError as e:
-                logger.error(f"ValueError in handle_swap: {e}")
-                selected_card.set(None)
-                return
-            except Exception as e:
-                logger.error(f"Unexpected error in handle_swap: {e}")
-                selected_card.set(None)
-                return
-
-            game.set(game_instance)
-
-            if result:
-                logger.info("Updating card positions after successful swap")
-                for i, row in enumerate(game_instance.rows):
-                    for j, card in enumerate(row):
-                        card_positions()[i][j].set(card)
-            else:
-                logger.info("Swap was unsuccessful, not updating card positions")
-
-            selected_card.set(None)
+        selected_card.set(clicked_card)
 
 
     @reactive.effect
     @reactive.event(input.drag_started)
-    async def handle_drag_start():
+    def handle_drag_start():
+        logger.info("Drag started")
         drag_start_data = input.drag_started()
         if drag_start_data:
             if selected_card():
@@ -151,18 +122,9 @@ def server(input, output, session):
             card_positions()[row][col].set(Card('S', 'Blank'))
 
     @reactive.effect
-    @reactive.event(input.drag_started)
-    def handle_drag_start():
-        drag_start_data = input.drag_started()
-        if drag_start_data:
-            dragged_card.set(drag_start_data['cardId'])
-            # Update the UI to show a blank card in the original position
-            row, col = drag_start_data['position']
-            card_positions()[row][col].set(Card('S', 'Blank'))
-
-    @reactive.effect
     @reactive.event(input.drag_ended)
     def handle_drag_end():
+        logger.info("Drag ended")
         drag_end_data = input.drag_ended()
         if drag_end_data and isinstance(drag_end_data, dict):
             card_id = drag_end_data['id']
@@ -179,6 +141,7 @@ def server(input, output, session):
                     original_card = Card(suit, value)
                     card_positions()[i][j].set(original_card)
 
+    
     @reactive.effect
     @reactive.event(input.swap_cards)
     def handle_swap():
@@ -186,8 +149,13 @@ def server(input, output, session):
         if swap_data is None:
             return
 
-        #card1_str = swap_data['card1']
-        card1_str = dragged_card()
+        card1_str = dragged_card() if dragged_card() is not None else selected_card()
+        
+        if card1_str is None:
+            logger.error("No card selected or being dragged")
+            return
+        
+        logger.info(f"card1_str: {card1_str}")
         card2_str = swap_data['card2']
         swap_method = swap_data.get('method', 'click')
 
@@ -200,19 +168,10 @@ def server(input, output, session):
             for i, row in enumerate(game_instance.rows):
                 for j, card in enumerate(row):
                     card_positions()[i][j].set(card)
-        elif swap_method == 'drag':
-            # If drag swap was unsuccessful, revert the source card
-            source_id = swap_data.get('sourceId', '')
-            parts = source_id.split('_')
-            if len(parts) >= 3:
-                i, j = int(parts[1]), int(parts[2])
-                suit, value = card1_str.split(':')
-                original_card = Card(suit, value)
-                card_positions()[i][j].set(original_card)
-            else:
-                print(f"Warning: Invalid source_id format: {source_id}")
-
-
+        
+        # Reset selected and dragged cards
+        selected_card.set(None)
+        dragged_card.set(None)
 
     # Add a debug output
     @render.text

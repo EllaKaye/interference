@@ -19,33 +19,32 @@ $(document).on('click', '.card', function() {
         // If no card is selected, select this card
         selectedCard = this;
         $(this).addClass('selected');
+        Shiny.setInputValue('card_clicked', cardData, {priority: 'event'});
     } else if (this !== selectedCard) {
         // If a different card is clicked
         let card1 = $(selectedCard).find('img').attr('data-card');
         let card2 = cardData;
         
-        if (card2.split(':')[0] !== 'Blank') {
+        if (card2.split(':')[0] === 'Blank') {
+            // If the clicked card is a "Blank", attempt to swap
+            console.log("Attempting swap");
+            Shiny.setInputValue('swap_cards', {
+                card2: card2,
+                method: 'click'
+            }, {priority: 'event'});
+            $(selectedCard).removeClass('selected');
+            selectedCard = null;
+        } else {
             // If the clicked card is not a "Blank", make it the new selected card
             $(selectedCard).removeClass('selected');
             selectedCard = this;
             $(this).addClass('selected');
-        } else {
-            // If the clicked card is a "Blank", attempt to swap
-            Shiny.setInputValue('swap_cards', {
-                card1: card1, 
-                card2: card2,
-                sourceId: $(selectedCard).attr('id'),
-                targetId: $(this).attr('id'),
-                method: 'click'  // Indicate this was a click-based swap
-            }, {priority: 'event'});
-            $(selectedCard).removeClass('selected');
-            selectedCard = null;
+            Shiny.setInputValue('card_clicked', cardData, {priority: 'event'});
         }
     } else {
         // If the same card is clicked again, deselect it
         $(this).removeClass('selected');
         selectedCard = null;
+        Shiny.setInputValue('card_clicked', null, {priority: 'event'});
     }
-
-    Shiny.setInputValue('card_clicked', cardData, {priority: 'event'});
 });

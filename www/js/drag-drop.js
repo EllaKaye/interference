@@ -15,6 +15,7 @@ function dragStart(event) {
     const selectedCard = document.querySelector('.card.selected');
     if (selectedCard) {
         selectedCard.classList.remove('selected');
+        Shiny.setInputValue('card_clicked', null, {priority: 'event'});
     }
 
     const card = event.target.closest('.card');
@@ -59,22 +60,18 @@ function dragStart(event) {
     Shiny.setInputValue('dragged_card', cardData, {priority: 'event'});
 
     document.addEventListener('dragover', updateDragFeedback);
+
+    Shiny.setInputValue('dragged_card', cardData, {priority: 'event'});
 }
 
-function updateDragFeedback(event) {
-    if (dragFeedback) {
-        dragFeedback.style.left = event.clientX + 'px';
-        dragFeedback.style.top = event.clientY + 'px';
-    }
-    event.preventDefault(); // Necessary to allow dropping
-}
+
 function updateDragFeedback(event) {
     if (dragFeedback) {
         // Update position considering the initial offset
         dragFeedback.style.left = (event.clientX - dragOffset.x) + 'px';
         dragFeedback.style.top = (event.clientY - dragOffset.y) + 'px';
     }
-    event.preventDefault();
+    event.preventDefault(); // Necessary to allow dropping
 }
 
 
@@ -163,13 +160,10 @@ function drop(event) {
         var targetId = targetElement.id;
         console.log("Drop - Source:", sourceId, "Target:", targetId);
         if (sourceId !== targetId) {
-            let sourceCard = document.getElementById(sourceId).querySelector('img').getAttribute('data-card');
             let targetCard = targetElement.querySelector('img').getAttribute('data-card');
-            console.log("Sending swap_cards event with data:", {card1: sourceCard, card2: targetCard, sourceId: sourceId, targetId: targetId});
+            console.log("Sending swap_cards event with data:", {card2: targetCard, method: 'drag'});
             Shiny.setInputValue('swap_cards', {
                 card2: targetCard,
-                sourcePosition: [Math.floor(parseInt(sourceId.split('_')[1]) / 13), parseInt(sourceId.split('_')[1]) % 13],
-                method: 'drag'
             }, {priority: 'event'});
         } else {
             // If dropped on itself, revert the image
