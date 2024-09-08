@@ -9,9 +9,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def server(input, output, session):
-    game = reactive.Value(None)
-    card_positions = reactive.Value(None)
-    selected_card = reactive.Value(None)
+    game = reactive.value(None)
+    card_positions = reactive.value(None)
+    selected_card = reactive.value(None)
+    dragged_card = reactive.value(None)
+    swap_method = reactive.value(None)
     
     ### set up the game
     def initialize_game():
@@ -71,7 +73,6 @@ def server(input, output, session):
                 game_over_modal(game_over_title)
             )
 
-
     @reactive.effect
     def _():
         round_over_title = game().round_over_title()
@@ -99,6 +100,52 @@ def server(input, output, session):
         for j in range(13):
             create_card_render(i, j)
 
+    ## Respond to clicks and drags
+    @reactive.effect
+    @reactive.event(input.card_clicked)  # set in card-selection.js
+    def handle_card_click():
+        clicked_card = input.card_clicked()
+        logger.info(f"Card clicked: {clicked_card}")
+        
+        if selected_card() is None:
+            logger.info(f"Setting selected card to: {clicked_card}")
+            selected_card.set(clicked_card)
+        else:
+            logger.info(f"Attempting to swap {selected_card()} with {clicked_card}")
+            game_instance = game()
+            try:
+                result = game_instance.handle_swap(selected_card(), clicked_card)
+                logger.info(f"Swap result: {result}")
+            except ValueError as e:
+                logger.error(f"ValueError in handle_swap: {e}")
+                selected_card.set(None)
+                return
+            except Exception as e:
+                logger.error(f"Unexpected error in handle_swap: {e}")
+                selected_card.set(None)
+                return
+
+            game.set(game_instance)
+
+            if result:
+                logger.info("Updating card positions after successful swap")
+                for i, row in enumerate(game_instance.rows):
+                    for j, card in enumerate(row):
+                        card_positions()[i][j].set(card)
+            else:
+                logger.info("Swap was unsuccessful, not updating card positions")
+
+            selected_card.set(None)
+
+    @reactive.effect
+    @reactive.event(input.drag_started)
+    def handle_drag_start():
+        drag_start_data = input.drag_started()
+        if drag_start_data:
+            dragged_card.set(drag_start_data['cardId'])
+            # Update the UI to show a blank card in the original position
+            row, col = drag_start_data['position']
+            card_positions()[row][col].set(Card('S', 'Blank'))
 
     @reactive.effect
     @reactive.event(input.drag_ended)
@@ -151,43 +198,6 @@ def server(input, output, session):
             else:
                 print(f"Warning: Invalid source_id format: {source_id}")
 
-
-
-    @reactive.effect
-    @reactive.event(input.card_clicked)  # set in card-selection.js
-    def _():
-        clicked_card = input.card_clicked()
-        logger.info(f"Card clicked: {clicked_card}")
-        
-        if selected_card() is None:
-            logger.info(f"Setting selected card to: {clicked_card}")
-            selected_card.set(clicked_card)
-        else:
-            logger.info(f"Attempting to swap {selected_card()} with {clicked_card}")
-            game_instance = game()
-            try:
-                result = game_instance.handle_swap(selected_card(), clicked_card)
-                logger.info(f"Swap result: {result}")
-            except ValueError as e:
-                logger.error(f"ValueError in handle_swap: {e}")
-                selected_card.set(None)
-                return
-            except Exception as e:
-                logger.error(f"Unexpected error in handle_swap: {e}")
-                selected_card.set(None)
-                return
-
-            game.set(game_instance)
-
-            if result:
-                logger.info("Updating card positions after successful swap")
-                for i, row in enumerate(game_instance.rows):
-                    for j, card in enumerate(row):
-                        card_positions()[i][j].set(card)
-            else:
-                logger.info("Swap was unsuccessful, not updating card positions")
-
-            selected_card.set(None)
 
 
     # Add a debug output

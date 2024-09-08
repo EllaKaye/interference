@@ -13,6 +13,14 @@ function dragStart(event) {
     draggedCardId = card.id;
     const cardImg = card.querySelector('img');
     originalCardSrc = cardImg.src;
+    const cardData = cardImg.getAttribute('data-card');
+
+    // Notify server of drag start
+    Shiny.setInputValue('drag_started', {
+        cardId: cardData,
+        position: [Math.floor(parseInt(draggedCardId.split('_')[1]) / 13), parseInt(draggedCardId.split('_')[1]) % 13]
+    }, {priority: 'event'});
+
     
     // Change the image in the grid to blank.webp
     cardImg.src = "img/webp/blank.webp";
