@@ -17,6 +17,11 @@ function dragStart(event) {
     originalCardSrc = cardImg.src;
     const cardData = cardImg.getAttribute('data-card');
 
+    // Calculate offset
+    const rect = cardImg.getBoundingClientRect();
+    dragOffset.x = event.clientX - rect.left;
+    dragOffset.y = event.clientY - rect.top;
+
     // Create drag feedback
     dragFeedback = new Image();
     dragFeedback.src = originalCardSrc;
@@ -26,9 +31,10 @@ function dragStart(event) {
     dragFeedback.style.opacity = '1';
     dragFeedback.style.width = cardImg.offsetWidth + 'px';
     dragFeedback.style.height = cardImg.offsetHeight + 'px';
-    dragFeedback.style.left = event.clientX + 'px';
-    dragFeedback.style.top = event.clientY + 'px';
-    dragFeedback.style.transform = 'translate(-50%, -50%)';
+    // Position the feedback image considering the offset
+    dragFeedback.style.left = (event.clientX - dragOffset.x) + 'px';
+    dragFeedback.style.top = (event.clientY - dragOffset.y) + 'px';
+    //dragFeedback.style.transform = 'translate(-50%, -50%)';
     document.body.appendChild(dragFeedback);
 
     // Set a completely transparent 1x1 pixel image as the drag image
@@ -58,17 +64,13 @@ function updateDragFeedback(event) {
 }
 function updateDragFeedback(event) {
     if (dragFeedback) {
-        dragFeedback.style.left = (event.clientX - dragFeedback.offsetWidth / 2) + 'px';
-        dragFeedback.style.top = (event.clientY - dragFeedback.offsetHeight / 2) + 'px';
+        // Update position considering the initial offset
+        dragFeedback.style.left = (event.clientX - dragOffset.x) + 'px';
+        dragFeedback.style.top = (event.clientY - dragOffset.y) + 'px';
     }
+    event.preventDefault();
 }
 
-function updateDragFeedback(event) {
-    if (dragFeedback) {
-        dragFeedback.style.left = (event.clientX - dragFeedback.offsetWidth / 2) + 'px';
-        dragFeedback.style.top = (event.clientY - dragFeedback.offsetHeight / 2) + 'px';
-    }
-}
 
 function dragEnd(event) {
     console.log("Drag ended:", draggedCardId);
