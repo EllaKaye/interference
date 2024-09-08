@@ -11,6 +11,12 @@ let draggedCardId = null;
 
 
 function dragStart(event) {
+    // Find and deselect any currently selected card
+    const selectedCard = document.querySelector('.card.selected');
+    if (selectedCard) {
+        selectedCard.classList.remove('selected');
+    }
+
     const card = event.target.closest('.card');
     draggedCardId = card.id;
     const cardImg = card.querySelector('img');

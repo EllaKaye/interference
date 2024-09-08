@@ -143,6 +143,8 @@ def server(input, output, session):
     async def handle_drag_start():
         drag_start_data = input.drag_started()
         if drag_start_data:
+            if selected_card():
+                selected_card.set(None)
             dragged_card.set(drag_start_data['cardId'])
             # Update the UI to show a blank card in the original position
             row, col = drag_start_data['position']
