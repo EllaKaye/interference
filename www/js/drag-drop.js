@@ -49,10 +49,13 @@ function dragStart(event) {
     emptyImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
     event.dataTransfer.setDragImage(emptyImage, 0, 0);
 
+    // Get grid position of card
+    let [_, row, col] = draggedCardId.split('_')
+
     // Notify server of drag start
     Shiny.setInputValue('drag_started', {
         cardId: cardData,
-        position: [Math.floor(parseInt(draggedCardId.split('_')[1]) / 13), parseInt(draggedCardId.split('_')[1]) % 13]
+        position: [parseInt(row), parseInt(col)]
     }, {priority: 'event'});
 
     event.dataTransfer.setData("text/plain", card.id);
@@ -84,10 +87,13 @@ function dragEnd(event) {
         // The card is still blank, meaning it wasn't dropped on a valid target
         // We need to revert it and notify the server
         cardImg.src = originalCardSrc;
+
+        // Get grid position of card
+        let [_, row, col] = draggedCardId.split('_')
         
         Shiny.setInputValue('drag_cancelled', {
             cardId: draggedCardId,
-            position: [Math.floor(parseInt(draggedCardId.split('_')[1]) / 13), parseInt(draggedCardId.split('_')[1]) % 13]
+            position: [parseInt(row), parseInt(col)]
         }, {priority: 'event'});
     }
     

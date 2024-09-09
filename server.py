@@ -90,10 +90,10 @@ def server(input, output, session):
     ### render the card as 52 individual UI elements,
     ### so that individual cards can be updated without need to re-render the whole grid
     def create_card_render(i, j):
-        @output(id=f"card_{i*13+j}")
+        @output(id=f"pos_{i}_{j}")
         @render.ui
         def _():
-            return card_ui(f"card_{i*13+j}", card_positions()[i][j]())
+            return card_ui(f"pos_{i}_{j}", card_positions()[i][j]())
 
     for i in range(4):
         for j in range(13):

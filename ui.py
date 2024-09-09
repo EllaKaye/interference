@@ -37,7 +37,7 @@ interference_panel = ui.nav_panel(
                 ),
                 ui.div(
                     *[ui.div(
-                        *[ui.output_ui(f"card_{i*13+j}") for j in range(13)],
+                        *[ui.output_ui(f"pos_{i}_{j}") for j in range(13)],
                         class_="row",
                     ) for i in range(4)],
                     class_="cards-container"
