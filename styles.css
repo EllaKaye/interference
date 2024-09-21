@@ -95,6 +95,7 @@ a {
     color: white;
 }
 
+/* target elements with `draggable` attribute*/
 [draggable] {
     -moz-user-select: none;
     -khtml-user-select: none;
